@@ -1,0 +1,29 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('products', function (Blueprint $table) {
+            // Jika belum ada kolom category
+            if (!Schema::hasColumn('products', 'category')) {
+                $table->string('category')->default('bucket')->after('name');
+            }
+
+            // Tambah index untuk performa filter
+            $table->index('category');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('products', function (Blueprint $table) {
+            $table->dropIndex(['category']);
+            $table->dropColumn('category');
+        });
+    }
+};
