@@ -21,13 +21,15 @@ export default {
                     900: "#831843",
                 },
             },
+            maxWidth: {
+                "8xl": "96rem",
+            },
             fontFamily: {
                 sans: ["Inter", "system-ui", "sans-serif"],
+                heading: ['"Playfair Display"', "serif"],
             },
             animation: {
                 "bounce-slow": "bounce 2s infinite",
-            },
-            animation: {
                 "fade-in": "fadeIn 0.5s ease-in",
                 "slide-up": "slideUp 0.5s ease-out",
                 "scale-in": "scaleIn 0.3s ease-out",

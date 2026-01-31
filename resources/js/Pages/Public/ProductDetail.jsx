@@ -13,6 +13,7 @@ export default function ProductDetail({ productId }) {
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [productImages, setProductImages] = useState([]);
+    const [isImageZoomed, setIsImageZoomed] = useState(false);
 
     const { addToCart, getItemQuantity } = useCart();
     const [customerName] = useLocalStorage("customer_name", "");
@@ -42,10 +43,8 @@ export default function ProductDetail({ productId }) {
             if (data.images && data.images.length > 0) {
                 console.log("🖼️ Product has images:", data.images);
 
-                // Ambil semua image_url dari array images
                 const images = data.images
                     .map((img) => {
-                        // Debug setiap gambar
                         console.log("Image data:", {
                             id: img.id,
                             image_path: img.image_path,
@@ -53,21 +52,18 @@ export default function ProductDetail({ productId }) {
                             is_primary: img.is_primary,
                         });
 
-                        // Gunakan image_url jika ada, jika tidak generate dari image_path
                         if (img.image_url) {
                             return img.image_url;
                         } else if (img.image_path) {
-                            // Generate URL manual
                             return `http://localhost:8000/storage/${img.image_path}`;
                         }
                         return null;
                     })
-                    .filter((url) => url !== null); // Filter out null values
+                    .filter((url) => url !== null);
 
                 console.log("✅ Processed images URLs:", images);
                 setProductImages(images);
 
-                // Set selected image ke primary jika ada
                 const primaryIndex = data.images.findIndex(
                     (img) => img.is_primary,
                 );
@@ -76,7 +72,6 @@ export default function ProductDetail({ productId }) {
                 }
             } else {
                 console.log("⚠️ Product has no images");
-                // Fallback ke gambar placeholder lokal
                 setProductImages(["/images/placeholder.jpg"]);
             }
         } catch (error) {
@@ -94,22 +89,8 @@ export default function ProductDetail({ productId }) {
                 stock: 10,
                 rating: 4.8,
                 is_active: true,
-                features: [
-                    "Bunga segar langsung dari petani",
-                    "Free greeting card",
-                    "Packaging eksklusif",
-                    "Same day delivery",
-                    "Free konsultasi florist",
-                ],
-                care_tips: [
-                    "Simpan di tempat sejuk jauh dari sinar matahari langsung",
-                    "Ganti air setiap 2 hari",
-                    "Potong sedikit batang bunga secara diagonal",
-                    "Hindarkan dari buah yang menghasilkan ethylene",
-                ],
             });
 
-            // Fallback images
             setProductImages(["/images/placeholder.jpg"]);
         } finally {
             setLoading(false);
@@ -119,7 +100,7 @@ export default function ProductDetail({ productId }) {
     const handleWhatsAppOrder = () => {
         if (!product) return;
 
-        const phoneNumber = "6281234567890";
+        const phoneNumber = "6282371663414";
         const message =
             `Halo admin BucketBouquets! 😊\n\n` +
             `Saya ${customerName || "Customer"} mau pesan:\n` +
@@ -137,7 +118,7 @@ export default function ProductDetail({ productId }) {
     const handleAddToCart = () => {
         if (!product) return;
         addToCart(product, quantity);
-        alert(`Ditambahkan ke keranjang: ${quantity} ${product.name}`);
+        alert(`✓ Berhasil ditambahkan: ${quantity} ${product.name}`);
     };
 
     const incrementQuantity = () => {
@@ -157,15 +138,28 @@ export default function ProductDetail({ productId }) {
     if (loading) {
         return (
             <AppLayout>
-                <div className="max-w-6xl mx-auto py-12">
+                <style>{`
+                    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+                `}</style>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="animate-pulse">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <div className="h-96 bg-gray-200 rounded-xl"></div>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                             <div className="space-y-4">
-                                <div className="h-8 bg-gray-200 rounded w-3/4"></div>
-                                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                                <div className="h-24 bg-gray-200 rounded"></div>
-                                <div className="h-12 bg-gray-200 rounded w-1/3"></div>
+                                <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl"></div>
+                                <div className="flex gap-3">
+                                    {[1, 2, 3, 4].map((i) => (
+                                        <div
+                                            key={i}
+                                            className="w-20 h-20 bg-gray-200 rounded-xl"
+                                        ></div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="space-y-6">
+                                <div className="h-10 bg-gray-200 rounded-lg w-3/4"></div>
+                                <div className="h-8 bg-gray-200 rounded-lg w-1/3"></div>
+                                <div className="h-24 bg-gray-200 rounded-lg"></div>
+                                <div className="h-16 bg-gray-200 rounded-lg"></div>
                             </div>
                         </div>
                     </div>
@@ -177,17 +171,38 @@ export default function ProductDetail({ productId }) {
     if (error || !product) {
         return (
             <AppLayout>
-                <div className="max-w-6xl mx-auto py-12 text-center">
-                    <div className="text-6xl mb-6">🌼</div>
-                    <h1 className="text-2xl font-bold text-gray-900 mb-3">
-                        Produk Tidak Ditemukan
-                    </h1>
-                    <p className="text-gray-600 mb-8">
-                        Produk yang Anda cari tidak tersedia atau telah dihapus.
-                    </p>
-                    <Link href="/catalog" className="btn btn-primary px-6 py-3">
-                        Kembali ke Katalog
-                    </Link>
+                <div className="min-h-screen flex items-center justify-center px-4">
+                    <div className="text-center max-w-md">
+                        <div className="w-24 h-24 mx-auto bg-gradient-to-br from-rose-100 to-pink-100 rounded-full flex items-center justify-center mb-6">
+                            <span className="text-5xl">🌼</span>
+                        </div>
+                        <h1 className="text-3xl font-bold text-gray-900 mb-3">
+                            Produk Tidak Ditemukan
+                        </h1>
+                        <p className="text-gray-600 mb-8">
+                            Produk yang Anda cari tidak tersedia atau telah
+                            dihapus dari katalog kami.
+                        </p>
+                        <Link
+                            href="/catalog"
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+                        >
+                            <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                                />
+                            </svg>
+                            Kembali ke Katalog
+                        </Link>
+                    </div>
                 </div>
             </AppLayout>
         );
@@ -195,111 +210,100 @@ export default function ProductDetail({ productId }) {
 
     return (
         <AppLayout>
-            <div className="max-w-6xl mx-auto py-6 md:py-8">
-                {/* Breadcrumb */}
-                <div className="mb-6 text-sm text-gray-600">
-                    <Link href="/" className="hover:text-primary-600">
-                        Home
-                    </Link>
-                    <span className="mx-2">/</span>
-                    <Link href="/catalog" className="hover:text-primary-600">
-                        Katalog
-                    </Link>
-                    <span className="mx-2">/</span>
-                    <span className="text-gray-900 font-medium">
-                        {product.name}
-                    </span>
-                </div>
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+                
+                .product-detail-container {
+                    font-family: 'DM Sans', sans-serif;
+                }
+                
+                .product-title {
+                    font-family: 'Playfair Display', serif;
+                }
+                
+                .image-zoom {
+                    cursor: zoom-in;
+                    transition: transform 0.3s ease;
+                }
+                
+                .image-zoom:hover {
+                    transform: scale(1.02);
+                }
+                
+                .thumbnail-scroll::-webkit-scrollbar {
+                    height: 6px;
+                }
+                
+                .thumbnail-scroll::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                    border-radius: 10px;
+                }
+                
+                .thumbnail-scroll::-webkit-scrollbar-thumb {
+                    background: #f43f5e;
+                    border-radius: 10px;
+                }
+                
+                .thumbnail-scroll::-webkit-scrollbar-thumb:hover {
+                    background: #e11d48;
+                }
+            `}</style>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
-                    {/* Product Images */}
-                    <div>
-                        {/* Debug Info */}
-                        {productImages.length === 0 && (
-                            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                                <p className="text-yellow-800 text-sm">
-                                    ⚠️ Produk ini belum memiliki gambar.
-                                </p>
-                            </div>
-                        )}
+            <div className="product-detail-container bg-gradient-to-b from-white via-rose-50/20 to-white min-h-screen">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    {/* Breadcrumb - Modern */}
+                    <nav className="mb-8">
+                        <ol className="flex items-center space-x-2 text-sm">
+                            <li>
+                                <Link
+                                    href="/"
+                                    className="text-gray-500 hover:text-rose-600 transition-colors"
+                                >
+                                    Beranda
+                                </Link>
+                            </li>
+                            <li className="text-gray-400">/</li>
+                            <li>
+                                <Link
+                                    href="/catalog"
+                                    className="text-gray-500 hover:text-rose-600 transition-colors"
+                                >
+                                    Katalog
+                                </Link>
+                            </li>
+                            <li className="text-gray-400">/</li>
+                            <li className="text-gray-900 font-medium truncate max-w-xs">
+                                {product.name}
+                            </li>
+                        </ol>
+                    </nav>
 
-                        {/* Main Image */}
-                        <div className="mb-4">
-                            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl overflow-hidden h-80 md:h-96">
-                                {productImages.length > 0 ? (
-                                    <img
-                                        src={productImages[selectedImage]}
-                                        alt={product.name}
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                            console.error(
-                                                "❌ Gambar gagal load:",
-                                                e.target.src,
-                                            );
-                                            // Coba URL alternatif jika ada image_path
-                                            if (
-                                                product.images &&
-                                                product.images[selectedImage]
-                                                    ?.image_path
-                                            ) {
-                                                const altUrl = `http://localhost:8000/storage/${product.images[selectedImage].image_path}`;
-                                                console.log(
-                                                    "🔄 Coba URL alternatif:",
-                                                    altUrl,
-                                                );
-                                                e.target.src = altUrl;
-                                            } else {
-                                                // Show placeholder
-                                                e.target.onerror = null;
-                                                e.target.src =
-                                                    "/images/placeholder.jpg";
-                                            }
-                                        }}
-                                        onLoad={() =>
-                                            console.log(
-                                                "✅ Gambar berhasil load",
-                                            )
-                                        }
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                        <div className="text-center">
-                                            <span className="text-6xl mb-4">
-                                                💐
-                                            </span>
-                                            <p className="text-gray-500">
-                                                Gambar tidak tersedia
-                                            </p>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Thumbnail Images */}
-                        {productImages.length > 1 && (
-                            <div className="flex gap-3 overflow-x-auto pb-2">
-                                {productImages.map((img, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => setSelectedImage(index)}
-                                        className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${selectedImage === index ? "border-primary-500" : "border-gray-200"}`}
-                                    >
+                    {/* Main Product Section */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+                        {/* Left Column - Images */}
+                        <div className="space-y-4">
+                            {/* Main Image */}
+                            <div className="relative bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
+                                <div className="aspect-square">
+                                    {productImages.length > 0 ? (
                                         <img
-                                            src={img}
-                                            alt={`${product.name} ${index + 1}`}
-                                            className="w-full h-full object-cover"
+                                            src={productImages[selectedImage]}
+                                            alt={product.name}
+                                            className="w-full h-full object-cover image-zoom"
+                                            onClick={() =>
+                                                setIsImageZoomed(!isImageZoomed)
+                                            }
                                             onError={(e) => {
                                                 console.error(
-                                                    "Thumbnail gagal load:",
+                                                    "❌ Gambar gagal load:",
                                                     e.target.src,
                                                 );
                                                 if (
-                                                    product.images &&
-                                                    product.images[index]
-                                                        ?.image_path
+                                                    product.images?.[
+                                                        selectedImage
+                                                    ]?.image_path
                                                 ) {
-                                                    e.target.src = `http://localhost:8000/storage/${product.images[index].image_path}`;
+                                                    e.target.src = `http://localhost:8000/storage/${product.images[selectedImage].image_path}`;
                                                 } else {
                                                     e.target.onerror = null;
                                                     e.target.src =
@@ -307,190 +311,419 @@ export default function ProductDetail({ productId }) {
                                                 }
                                             }}
                                         />
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* Image Counter */}
-                        {productImages.length > 0 && (
-                            <div className="mt-3 text-sm text-gray-600">
-                                Gambar {selectedImage + 1} dari{" "}
-                                {productImages.length}
-                            </div>
-                        )}
-
-                        {/* Product Tags */}
-                        <div className="flex flex-wrap gap-2 mt-6">
-                            <span className="px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm">
-                                💐 {product.category}
-                            </span>
-                            <span
-                                className={`px-3 py-1 rounded-full text-sm ${product.stock > 5 ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}
-                            >
-                                {product.stock > 5
-                                    ? "🟢 Stok Tersedia"
-                                    : "🟡 Stok Terbatas"}
-                            </span>
-                            {product.images && product.images.length > 0 && (
-                                <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
-                                    📸 {product.images.length} gambar
-                                </span>
-                            )}
-                            <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                                ⭐ {product.rating || "4.5"}
-                            </span>
-                            {product.is_active && (
-                                <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-sm">
-                                    ✅ Aktif
-                                </span>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Product Info */}
-                    <div>
-                        <div className="mb-6">
-                            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-                                {product.name}
-                            </h1>
-
-                            <div className="flex items-center gap-4 mb-4">
-                                <div className="text-3xl font-bold text-primary-600">
-                                    Rp {product.price.toLocaleString("id-ID")}
-                                </div>
-                                <div className="text-gray-500 line-through text-lg">
-                                    Rp{" "}
-                                    {(product.price * 1.2).toLocaleString(
-                                        "id-ID",
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+                                            <div className="text-center p-8">
+                                                <span className="text-7xl mb-4 block">
+                                                    💐
+                                                </span>
+                                                <p className="text-gray-500 font-medium">
+                                                    Gambar tidak tersedia
+                                                </p>
+                                            </div>
+                                        </div>
                                     )}
                                 </div>
-                                <div className="px-2 py-1 bg-red-100 text-red-800 text-sm font-bold rounded">
-                                    -20%
+
+                                {/* Image Counter Badge */}
+                                {productImages.length > 1 && (
+                                    <div className="absolute bottom-4 right-4 px-3 py-1.5 bg-black/60 backdrop-blur-sm text-white text-xs font-medium rounded-lg">
+                                        {selectedImage + 1} /{" "}
+                                        {productImages.length}
+                                    </div>
+                                )}
+
+                                {/* Navigation Arrows */}
+                                {productImages.length > 1 && (
+                                    <>
+                                        <button
+                                            onClick={() =>
+                                                setSelectedImage((prev) =>
+                                                    prev === 0
+                                                        ? productImages.length -
+                                                          1
+                                                        : prev - 1,
+                                                )
+                                            }
+                                            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all"
+                                        >
+                                            <svg
+                                                className="w-5 h-5 text-gray-700"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M15 19l-7-7 7-7"
+                                                />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            onClick={() =>
+                                                setSelectedImage((prev) =>
+                                                    prev ===
+                                                    productImages.length - 1
+                                                        ? 0
+                                                        : prev + 1,
+                                                )
+                                            }
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all"
+                                        >
+                                            <svg
+                                                className="w-5 h-5 text-gray-700"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M9 5l7 7-7 7"
+                                                />
+                                            </svg>
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+
+                            {/* Thumbnail Gallery */}
+                            {productImages.length > 1 && (
+                                <div className="thumbnail-scroll flex gap-3 overflow-x-auto pb-2">
+                                    {productImages.map((img, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() =>
+                                                setSelectedImage(index)
+                                            }
+                                            className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${
+                                                selectedImage === index
+                                                    ? "border-rose-500 shadow-md scale-105"
+                                                    : "border-gray-200 hover:border-gray-300"
+                                            }`}
+                                        >
+                                            <img
+                                                src={img}
+                                                alt={`${product.name} ${index + 1}`}
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                    if (
+                                                        product.images?.[index]
+                                                            ?.image_path
+                                                    ) {
+                                                        e.target.src = `http://localhost:8000/storage/${product.images[index].image_path}`;
+                                                    } else {
+                                                        e.target.onerror = null;
+                                                        e.target.src =
+                                                            "/images/placeholder.jpg";
+                                                    }
+                                                }}
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Product Badges */}
+                            <div className="flex flex-wrap gap-2">
+                                <span className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200 text-rose-700 rounded-lg text-sm font-semibold">
+                                    🌸 {product.category}
+                                </span>
+                                <span
+                                    className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-semibold ${
+                                        product.stock > 5
+                                            ? "bg-emerald-50 border border-emerald-200 text-emerald-700"
+                                            : "bg-amber-50 border border-amber-200 text-amber-700"
+                                    }`}
+                                >
+                                    <span
+                                        className={`w-2 h-2 rounded-full mr-2 ${
+                                            product.stock > 5
+                                                ? "bg-emerald-500"
+                                                : "bg-amber-500"
+                                        }`}
+                                    ></span>
+                                    {product.stock > 5
+                                        ? "Tersedia"
+                                        : "Stok Terbatas"}
+                                </span>
+                                {product.rating && (
+                                    <span className="inline-flex items-center px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg text-sm font-semibold">
+                                        ⭐ {product.rating}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Right Column - Product Info */}
+                        <div className="space-y-6">
+                            {/* Title & Rating */}
+                            <div>
+                                <h1 className="product-title text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">
+                                    {product.name}
+                                </h1>
+
+                                {/* Rating & Reviews */}
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="flex items-center gap-1">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <svg
+                                                key={star}
+                                                className={`w-5 h-5 ${
+                                                    star <=
+                                                    Math.floor(
+                                                        product.rating || 4.8,
+                                                    )
+                                                        ? "text-amber-400 fill-current"
+                                                        : "text-gray-300"
+                                                }`}
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                                                />
+                                            </svg>
+                                        ))}
+                                    </div>
+                                    <span className="text-gray-600 text-sm">
+                                        {product.rating || "4.8"} • 127 ulasan
+                                    </span>
                                 </div>
                             </div>
 
-                            <p className="text-gray-600 mb-6 leading-relaxed">
-                                {product.description}
-                            </p>
-
-                            {/* Stock Info */}
-                            <div className="mb-6 p-4 bg-gray-50 rounded-xl">
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="text-gray-700">
-                                        Stok Tersedia:
+                            {/* Price Section */}
+                            <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-2xl p-6 border border-rose-100">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <span className="text-4xl font-bold text-rose-600">
+                                        Rp{" "}
+                                        {product.price.toLocaleString("id-ID")}
                                     </span>
-                                    <span className="font-bold">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-lg text-gray-400 line-through">
+                                            Rp{" "}
+                                            {(
+                                                product.price * 1.2
+                                            ).toLocaleString("id-ID")}
+                                        </span>
+                                        <span className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-lg">
+                                            -20%
+                                        </span>
+                                    </div>
+                                </div>
+                                <p className="text-sm text-gray-600">
+                                    Hemat Rp{" "}
+                                    {(product.price * 0.2).toLocaleString(
+                                        "id-ID",
+                                    )}{" "}
+                                    dari harga normal
+                                </p>
+                            </div>
+
+                            {/* Description */}
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                                    Deskripsi Produk
+                                </h3>
+                                <p className="text-gray-600 leading-relaxed">
+                                    {product.description}
+                                </p>
+                            </div>
+
+                            {/* Stock Progress */}
+                            <div className="bg-white rounded-xl p-5 border border-gray-100">
+                                <div className="flex justify-between items-center mb-3">
+                                    <span className="text-sm font-medium text-gray-700">
+                                        Stok Tersedia
+                                    </span>
+                                    <span className="text-lg font-bold text-gray-900">
                                         {product.stock} unit
                                     </span>
                                 </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
                                     <div
-                                        className="bg-green-500 h-2 rounded-full"
+                                        className="bg-gradient-to-r from-emerald-500 to-emerald-600 h-2.5 rounded-full transition-all duration-500"
                                         style={{
                                             width: `${Math.min((product.stock / 20) * 100, 100)}%`,
                                         }}
                                     ></div>
                                 </div>
+                                <p className="text-xs text-gray-500 mt-2">
+                                    {product.stock > 10
+                                        ? "Stok melimpah"
+                                        : product.stock > 5
+                                          ? "Stok terbatas"
+                                          : "Buruan pesan sebelum habis!"}
+                                </p>
+                            </div>
+
+                            {/* Quantity Selector */}
+                            <div className="bg-white rounded-xl p-5 border border-gray-100">
+                                <label className="block text-sm font-semibold text-gray-900 mb-4">
+                                    Pilih Jumlah
+                                </label>
+                                <div className="flex items-center gap-6">
+                                    <div className="flex items-center bg-gray-50 rounded-xl border border-gray-200">
+                                        <button
+                                            onClick={decrementQuantity}
+                                            disabled={quantity <= 1}
+                                            className="w-12 h-12 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-l-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            <svg
+                                                className="w-5 h-5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2.5}
+                                                    d="M20 12H4"
+                                                />
+                                            </svg>
+                                        </button>
+                                        <div className="w-16 h-12 flex items-center justify-center text-xl font-bold text-gray-900">
+                                            {quantity}
+                                        </div>
+                                        <button
+                                            onClick={incrementQuantity}
+                                            disabled={quantity >= product.stock}
+                                            className="w-12 h-12 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-r-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            <svg
+                                                className="w-5 h-5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2.5}
+                                                    d="M12 4v16m8-8H4"
+                                                />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <div className="flex-1">
+                                        <div className="text-2xl font-bold text-gray-900">
+                                            Rp{" "}
+                                            {(
+                                                product.price * quantity
+                                            ).toLocaleString("id-ID")}
+                                        </div>
+                                        <div className="text-sm text-gray-500">
+                                            {quantity} item × Rp{" "}
+                                            {product.price.toLocaleString(
+                                                "id-ID",
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="space-y-3 sticky top-4">
+                                <button
+                                    onClick={handleAddToCart}
+                                    className="group relative w-full h-14 overflow-hidden rounded-xl transition-all duration-300 hover:shadow-xl"
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-r from-rose-500 via-rose-600 to-pink-600 transition-all duration-300 group-hover:from-rose-600 group-hover:via-pink-600 group-hover:to-rose-700"></div>
+                                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
+                                    </div>
+                                    <div className="relative flex items-center justify-center gap-3 h-full">
+                                        <svg
+                                            className="w-6 h-6 text-white"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                                            />
+                                        </svg>
+                                        <span className="text-white font-bold text-lg">
+                                            {quantityInCart > 0
+                                                ? `Tambah ke Keranjang (${quantityInCart} item)`
+                                                : "Tambah ke Keranjang"}
+                                        </span>
+                                    </div>
+                                </button>
+
+                                <button
+                                    onClick={handleWhatsAppOrder}
+                                    className="w-full h-14 flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl"
+                                >
+                                    <svg
+                                        className="w-6 h-6"
+                                        fill="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                                    </svg>
+                                    Pesan via WhatsApp
+                                </button>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Quantity Selector */}
-                        <div className="mb-8">
-                            <label className="block text-sm font-medium text-gray-700 mb-3">
-                                Pilih Jumlah:
-                            </label>
-                            <div className="flex items-center gap-4">
-                                <div className="flex items-center border border-gray-300 rounded-xl">
-                                    <button
-                                        onClick={decrementQuantity}
-                                        className="w-12 h-12 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-l-xl"
-                                        disabled={quantity <= 1}
-                                    >
-                                        -
-                                    </button>
-                                    <div className="w-16 h-12 flex items-center justify-center text-lg font-bold">
-                                        {quantity}
-                                    </div>
-                                    <button
-                                        onClick={incrementQuantity}
-                                        className="w-12 h-12 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-r-xl"
-                                        disabled={quantity >= product.stock}
-                                    >
-                                        +
-                                    </button>
-                                </div>
-
-                                <div className="text-gray-700">
-                                    <div className="font-bold">
-                                        Rp{" "}
-                                        {(
-                                            product.price * quantity
-                                        ).toLocaleString("id-ID")}
-                                    </div>
-                                    <div className="text-sm">
-                                        {quantity} × Rp{" "}
-                                        {product.price.toLocaleString("id-ID")}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="space-y-3 mb-8">
-                            <button
-                                onClick={handleAddToCart}
-                                className="btn w-full flex items-center justify-center gap-2 bg-gradient-to-r from-primary-500 to-pink-500 hover:from-primary-600 hover:to-pink-600 text-white text-lg py-4 rounded-xl shadow-lg hover:shadow-xl"
-                            >
-                                <span>🛒</span>
-                                <span className="font-bold">
-                                    {quantityInCart > 0
-                                        ? `Tambah ke Keranjang (${quantityInCart} di cart)`
-                                        : "Tambah ke Keranjang"}
-                                </span>
-                            </button>
-
-                            <button
-                                onClick={handleWhatsAppOrder}
-                                className="btn w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-lg py-4 rounded-xl border-2 border-green-600"
-                            >
-                                <span>💬</span>
-                                <span className="font-bold">
-                                    Pesan Langsung via WhatsApp
-                                </span>
-                            </button>
-
-                            <Link
-                                href="/catalog"
-                                className="btn w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 py-4 rounded-xl"
-                            >
-                                ← Kembali ke Katalog
-                            </Link>
-                        </div>
-
-                        {/* Product Features */}
-                        <div className="mb-8">
-                            <h3 className="text-lg font-bold text-gray-900 mb-4">
-                                🌟 Keunggulan Produk
+                    {/* Features & Benefits */}
+                    <div className="grid md:grid-cols-2 gap-8 mb-16">
+                        {/* Features */}
+                        <div className="bg-white rounded-2xl p-8 border border-gray-100">
+                            <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                                <span className="text-2xl">✨</span>
+                                Keunggulan Produk
                             </h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="space-y-4">
                                 {[
-                                    "Bunga segar langsung dari petani lokal",
-                                    "Free greeting card & packaging eksklusif",
-                                    "Same day delivery (pesan sebelum jam 2 siang)",
-                                    "Free konsultasi dengan florist kami",
-                                    "Garansi kesegaran bunga 2 hari",
-                                    "Bisa custom request warna & jenis bunga",
+                                    {
+                                        icon: "🌸",
+                                        text: "Bunga segar langsung dari petani lokal",
+                                    },
+                                    {
+                                        icon: "🎁",
+                                        text: "Free greeting card & packaging eksklusif",
+                                    },
+                                    {
+                                        icon: "🚚",
+                                        text: "Same day delivery (pesan sebelum jam 2 siang)",
+                                    },
+                                    {
+                                        icon: "👨‍🌾",
+                                        text: "Free konsultasi dengan florist profesional",
+                                    },
+                                    {
+                                        icon: "✅",
+                                        text: "Garansi kesegaran bunga 2 hari",
+                                    },
+                                    {
+                                        icon: "🎨",
+                                        text: "Bisa custom request warna & jenis bunga",
+                                    },
                                 ].map((feature, index) => (
                                     <div
                                         key={index}
-                                        className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg"
+                                        className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
                                     >
-                                        <span className="text-green-600 mt-0.5">
-                                            ✓
+                                        <span className="text-2xl flex-shrink-0">
+                                            {feature.icon}
                                         </span>
-                                        <span className="text-gray-700 text-sm">
-                                            {feature}
+                                        <span className="text-gray-700 leading-relaxed">
+                                            {feature.text}
                                         </span>
                                     </div>
                                 ))}
@@ -498,69 +731,103 @@ export default function ProductDetail({ productId }) {
                         </div>
 
                         {/* Care Tips */}
-                        <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                            <h3 className="text-lg font-bold text-blue-900 mb-2">
-                                💡 Tips Perawatan
+                        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-8 border border-blue-100">
+                            <h3 className="text-2xl font-bold text-blue-900 mb-6 flex items-center gap-2">
+                                <span className="text-2xl">💡</span>
+                                Tips Perawatan
                             </h3>
-                            <ul className="text-blue-800 text-sm space-y-1">
-                                <li>
-                                    • Simpan di tempat sejuk, hindari sinar
-                                    matahari langsung
-                                </li>
-                                <li>
-                                    • Ganti air setiap 2 hari untuk menjaga
-                                    kesegaran
-                                </li>
-                                <li>
-                                    • Potong sedikit batang bunga secara
-                                    diagonal
-                                </li>
-                                <li>
-                                    • Hindarkan dari buah yang menghasilkan
-                                    ethylene
-                                </li>
-                            </ul>
+                            <div className="space-y-4">
+                                {[
+                                    "Simpan di tempat sejuk, hindari sinar matahari langsung",
+                                    "Ganti air setiap 2 hari untuk menjaga kesegaran",
+                                    "Potong sedikit batang bunga secara diagonal",
+                                    "Hindarkan dari buah yang menghasilkan ethylene",
+                                    "Semprotkan air pada bunga secara berkala",
+                                    "Jauhkan dari AC atau kipas angin langsung",
+                                ].map((tip, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex items-start gap-3 p-3"
+                                    >
+                                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <span className="text-white text-xs font-bold">
+                                                {index + 1}
+                                            </span>
+                                        </div>
+                                        <span className="text-blue-900 leading-relaxed">
+                                            {tip}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Related Products Section */}
-                <div className="mt-16">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                        Produk Serupa Lainnya
-                    </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {/* Placeholder for related products */}
-                        {[1, 2, 3, 4].map((i) => (
+                    {/* Related Products */}
+                    <div className="mb-12">
+                        <div className="flex items-center justify-between mb-8">
+                            <h2 className="text-3xl font-bold text-gray-900">
+                                Produk Serupa
+                            </h2>
                             <Link
-                                key={i}
-                                href={`/product/${i}`}
-                                className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+                                href="/catalog"
+                                className="text-rose-600 hover:text-rose-700 font-semibold text-sm flex items-center gap-1"
                             >
-                                <div className="h-40 bg-gradient-to-br from-primary-50 to-pink-50 rounded-lg mb-4 flex items-center justify-center">
-                                    <span className="text-4xl">💐</span>
-                                </div>
-                                <h3 className="font-bold text-gray-900 mb-2">
-                                    Bucket Bunga {i}
-                                </h3>
-                                <div className="text-primary-600 font-bold">
-                                    Rp{" "}
-                                    {(250000 + i * 50000).toLocaleString(
-                                        "id-ID",
-                                    )}
-                                </div>
+                                Lihat Semua
+                                <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 5l7 7-7 7"
+                                    />
+                                </svg>
                             </Link>
-                        ))}
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            {[1, 2, 3, 4].map((i) => (
+                                <Link
+                                    key={i}
+                                    href={`/product/${i}`}
+                                    className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all"
+                                >
+                                    <div className="aspect-square bg-gradient-to-br from-rose-50 to-pink-50 flex items-center justify-center overflow-hidden">
+                                        <span className="text-6xl group-hover:scale-110 transition-transform duration-300">
+                                            💐
+                                        </span>
+                                    </div>
+                                    <div className="p-4">
+                                        <h3 className="font-bold text-gray-900 mb-2 line-clamp-1">
+                                            Bucket Bunga Premium {i}
+                                        </h3>
+                                        <div className="text-rose-600 font-bold text-lg">
+                                            Rp{" "}
+                                            {(
+                                                250000 +
+                                                i * 50000
+                                            ).toLocaleString("id-ID")}
+                                        </div>
+                                        <div className="flex items-center gap-1 mt-2">
+                                            <svg
+                                                className="w-4 h-4 text-amber-400 fill-current"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                            </svg>
+                                            <span className="text-xs text-gray-600">
+                                                4.{8 - i}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
                     </div>
-                </div>
-
-                {/* Development Note */}
-                <div className="mt-12 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-                    <p className="text-purple-800 text-sm">
-                        <span className="font-bold">FITUR BARU:</span> Multiple
-                        images support aktif! Produk bisa memiliki beberapa
-                        gambar.
-                    </p>
                 </div>
             </div>
 

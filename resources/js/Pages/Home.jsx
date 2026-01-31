@@ -3,7 +3,7 @@ import { Link } from "@inertiajs/react";
 import AppLayout from "../Layouts/AppLayout";
 import WhatsAppFloatingButton from "../Components/WhatsAppFloatingButton";
 import OnboardingModal from "../Components/OnboardingModal";
-import ProductCard from "../Components/ProductCard"; // Import komponen ProductCard
+import ProductCard from "../Components/ProductCard";
 import {
     FaWhatsapp,
     FaChevronRight,
@@ -14,6 +14,8 @@ import {
     FaGift,
     FaShieldAlt,
     FaClock,
+    FaStar,
+    FaQuoteLeft,
 } from "react-icons/fa";
 
 export default function Home() {
@@ -21,9 +23,18 @@ export default function Home() {
     const [bestSellerProducts, setBestSellerProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [wishlist, setWishlist] = useState([]);
+    const [activeTestimonial, setActiveTestimonial] = useState(0);
 
     useEffect(() => {
         fetchProducts();
+    }, []);
+
+    // Auto-rotate testimonials
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
+        }, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     const fetchProducts = async () => {
@@ -34,18 +45,13 @@ export default function Home() {
             if (response.ok) {
                 const data = await response.json();
                 const activeProducts = data.filter((p) => p.is_active);
-
-                // Featured products (first 4)
                 setFeaturedProducts(activeProducts.slice(0, 4));
-
-                // Best seller products (next 4 or random)
                 setBestSellerProducts(
                     activeProducts.slice(4, 8).length > 0
                         ? activeProducts.slice(4, 8)
                         : activeProducts.slice(0, 4),
                 );
             } else {
-                // Fallback data - tambahkan properties yang diperlukan untuk ProductCard
                 const fallbackProducts = getFallbackProducts();
                 setFeaturedProducts(fallbackProducts.slice(0, 4));
                 setBestSellerProducts(fallbackProducts.slice(0, 4));
@@ -327,55 +333,322 @@ export default function Home() {
         },
     ];
 
+    const stats = [
+        { number: "10,000+", label: "Bucket Terjual", icon: "🌸" },
+        { number: "5,000+", label: "Pelanggan Puas", icon: "😊" },
+        { number: "4.9/5", label: "Rating Terbaik", icon: "⭐" },
+        { number: "24/7", label: "Siap Melayani", icon: "💬" },
+    ];
+
     return (
         <AppLayout>
-            {/* ==================== HERO SECTION ==================== */}
+            <style jsx>{`
+                @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap");
+
+                .font-playfair {
+                    font-family: "Playfair Display", serif;
+                }
+
+                .font-poppins {
+                    font-family: "Poppins", sans-serif;
+                }
+
+                @keyframes float {
+                    0%,
+                    100% {
+                        transform: translateY(0px);
+                    }
+                    50% {
+                        transform: translateY(-20px);
+                    }
+                }
+
+                @keyframes slideInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                    }
+                    to {
+                        opacity: 1;
+                    }
+                }
+
+                @keyframes scaleIn {
+                    from {
+                        opacity: 0;
+                        transform: scale(0.9);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: scale(1);
+                    }
+                }
+
+                .animate-float {
+                    animation: float 3s ease-in-out infinite;
+                }
+
+                .animate-slide-up {
+                    animation: slideInUp 0.6s ease-out forwards;
+                }
+
+                .animate-fade-in {
+                    animation: fadeIn 0.8s ease-out forwards;
+                }
+
+                .animate-scale-in {
+                    animation: scaleIn 0.5s ease-out forwards;
+                }
+
+                .delay-100 {
+                    animation-delay: 0.1s;
+                }
+                .delay-200 {
+                    animation-delay: 0.2s;
+                }
+                .delay-300 {
+                    animation-delay: 0.3s;
+                }
+                .delay-400 {
+                    animation-delay: 0.4s;
+                }
+                .delay-500 {
+                    animation-delay: 0.5s;
+                }
+                .delay-600 {
+                    animation-delay: 0.6s;
+                }
+
+                .text-gradient {
+                    background: linear-gradient(
+                        135deg,
+                        #ec4899 0%,
+                        #f43f5e 50%,
+                        #f97316 100%
+                    );
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                }
+
+                .bg-noise {
+                    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+                }
+
+                .glass-effect {
+                    background: rgba(255, 255, 255, 0.7);
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                }
+
+                .hover-lift {
+                    transition:
+                        transform 0.3s ease,
+                        box-shadow 0.3s ease;
+                }
+
+                .hover-lift:hover {
+                    transform: translateY(-8px);
+                    box-shadow: 0 20px 40px rgba(236, 72, 153, 0.2);
+                }
+            `}</style>
+
+            {/* ==================== HERO SECTION - ENHANCED ==================== */}
             <section
-                className="relative w-full"
+                className="relative w-full overflow-hidden"
                 style={{ marginTop: "-10rem", paddingTop: "10rem" }}
             >
-                <div
-                    className="w-full min-h-screen bg-cover bg-center bg-no-repeat"
-                    style={{
-                        backgroundImage: "url(/storage/banners/hero1.png)",
-                    }}
-                />
+                {/* Hero Image with Overlay */}
+                <div className="relative w-full min-h-screen">
+                    {/* Image Container */}
+                    <div
+                        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                        style={{
+                            backgroundImage: "url(/storage/banners/hero1.png)",
+                        }}
+                    />
+
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-white"></div>
+
+                    {/* Noise Texture */}
+                    <div className="absolute inset-0 bg-noise opacity-20"></div>
+
+                    {/* Content Overlay */}
+                    <div className="relative z-10 container mx-auto px-4 h-screen flex items-center">
+                        <div className="max-w-3xl opacity-0 animate-slide-up">
+                            {/* Badge */}
+                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full text-sm font-medium text-pink-700 mb-6 shadow-lg delay-100">
+                                <span className="w-2 h-2 bg-pink-500 rounded-full animate-pulse"></span>
+                                Trusted by 5,000+ Happy Customers
+                            </div>
+
+                            {/* Main Heading */}
+                            <h1 className="font-playfair text-5xl md:text-7xl font-bold text-white mb-6 leading-tight delay-200">
+                                Sentuhan Cinta dalam
+                                <span className="block text-gradient mt-2">
+                                    Setiap Kelopak
+                                </span>
+                            </h1>
+
+                            {/* Subheading */}
+                            <p className="font-poppins text-xl md:text-2xl text-white/90 mb-8 leading-relaxed delay-300">
+                                Wujudkan momen spesial dengan bucket bunga
+                                premium yang dirangkai dengan penuh kasih sayang
+                            </p>
+
+                            {/* CTA Buttons */}
+                            <div className="flex flex-col sm:flex-row gap-4 delay-400">
+                                <button
+                                    onClick={handleWhatsAppClick}
+                                    className="group px-8 py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-full hover:from-pink-700 hover:to-rose-700 transition-all duration-300 shadow-2xl hover:shadow-pink-500/50 flex items-center justify-center gap-3 font-semibold text-lg hover-lift"
+                                >
+                                    <FaWhatsapp className="w-6 h-6" />
+                                    <span>Pesan Sekarang</span>
+                                    <FaChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                </button>
+
+                                <Link
+                                    href="/catalog"
+                                    className="px-8 py-4 bg-white/90 backdrop-blur-sm text-pink-700 rounded-full hover:bg-white transition-all duration-300 shadow-xl font-semibold text-lg text-center hover-lift"
+                                >
+                                    Lihat Katalog
+                                </Link>
+                            </div>
+
+                            {/* Trust Indicators */}
+                            <div className="flex items-center gap-6 mt-8 delay-500">
+                                <div className="flex items-center gap-2">
+                                    <div className="flex -space-x-2">
+                                        {[1, 2, 3, 4].map((i) => (
+                                            <div
+                                                key={i}
+                                                className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 border-2 border-white flex items-center justify-center text-white font-bold text-sm"
+                                            >
+                                                {String.fromCharCode(64 + i)}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="text-white text-sm font-medium ml-2">
+                                        <div className="flex items-center gap-1">
+                                            {[...Array(5)].map((_, i) => (
+                                                <FaStar
+                                                    key={i}
+                                                    className="w-3 h-3 text-yellow-400 fill-current"
+                                                />
+                                            ))}
+                                        </div>
+                                        <div className="opacity-90">
+                                            4.9/5 dari 1,200+ review
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Scroll Indicator */}
+                    <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+                        <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center p-2">
+                            <div className="w-1 h-3 bg-white/70 rounded-full animate-pulse"></div>
+                        </div>
+                    </div>
+                </div>
             </section>
 
-            {/* ==================== FEATURED PRODUCTS SECTION ==================== */}
-            <section className="bg-gradient-to-b from-white to-pink-50 py-16 md:py-20">
+            {/* ==================== STATS SECTION - NEW ==================== */}
+            <section className="bg-gradient-to-br from-pink-600 via-rose-600 to-pink-700 py-16 relative overflow-hidden">
+                <div className="absolute inset-0 bg-noise"></div>
+                <div className="container mx-auto px-4 relative z-10">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                        {stats.map((stat, index) => (
+                            <div
+                                key={index}
+                                className="text-center opacity-0 animate-scale-in"
+                                style={{ animationDelay: `${index * 0.1}s` }}
+                            >
+                                <div
+                                    className="text-5xl mb-3 animate-float"
+                                    style={{
+                                        animationDelay: `${index * 0.2}s`,
+                                    }}
+                                >
+                                    {stat.icon}
+                                </div>
+                                <div className="font-playfair text-4xl md:text-5xl font-bold text-white mb-2">
+                                    {stat.number}
+                                </div>
+                                <div className="font-poppins text-pink-100 text-sm md:text-base">
+                                    {stat.label}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ==================== FEATURED PRODUCTS - ENHANCED ==================== */}
+            <section className="bg-gradient-to-b from-white via-pink-50/30 to-white py-20 md:py-28">
                 <div className="container mx-auto px-4">
                     <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-10 md:mb-12">
-                            <div className="inline-block px-4 py-1.5 bg-pink-50 text-pink-700 rounded-full text-sm font-medium mb-3">
-                                🌟 TERBARU
+                        {/* Section Header */}
+                        <div className="text-center mb-16">
+                            <div className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-pink-100 to-rose-100 text-pink-700 rounded-full text-sm font-semibold mb-6 shadow-sm">
+                                <span className="text-xl">🌟</span>
+                                <span className="font-poppins">
+                                    KOLEKSI TERBARU
+                                </span>
                             </div>
-                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+                            <h2 className="font-playfair text-4xl md:text-6xl font-bold text-gray-900 mb-4">
                                 Produk Unggulan
                             </h2>
-                            <p className="text-gray-600 max-w-2xl mx-auto">
-                                Koleksi terbaru yang siap mempesona hari spesial
-                                Anda
+                            <p className="font-poppins text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+                                Karya terbaik kami yang siap mempesona hari
+                                spesial Anda
                             </p>
+
+                            {/* Decorative Line */}
+                            <div className="flex items-center justify-center gap-3 mt-6">
+                                <div className="w-12 h-0.5 bg-gradient-to-r from-transparent to-pink-300"></div>
+                                <div className="w-2 h-2 bg-pink-500 rounded-full"></div>
+                                <div className="w-24 h-0.5 bg-gradient-to-r from-pink-300 via-rose-400 to-pink-300"></div>
+                                <div className="w-2 h-2 bg-pink-500 rounded-full"></div>
+                                <div className="w-12 h-0.5 bg-gradient-to-l from-transparent to-pink-300"></div>
+                            </div>
                         </div>
 
                         {loading ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                                 {[1, 2, 3, 4].map((i) => (
                                     <div key={i} className="animate-pulse">
-                                        <div className="bg-gray-200 rounded-xl aspect-[3/4] mb-3"></div>
-                                        <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                                        <div className="bg-gray-200 rounded-2xl aspect-[3/4] mb-4"></div>
+                                        <div className="h-4 bg-gray-200 rounded mb-3 w-3/4"></div>
                                         <div className="h-6 bg-gray-200 rounded w-1/2"></div>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {featuredProducts.map((product) => (
-                                    <ProductCard
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                                {featuredProducts.map((product, index) => (
+                                    <div
                                         key={product.id}
-                                        product={product}
-                                    />
+                                        className="opacity-0 animate-slide-up"
+                                        style={{
+                                            animationDelay: `${index * 0.1}s`,
+                                        }}
+                                    >
+                                        <ProductCard product={product} />
+                                    </div>
                                 ))}
                             </div>
                         )}
@@ -383,90 +656,64 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* ==================== BEST SELLER SECTION ==================== */}
-            <section className="bg-white py-16 md:py-20">
+            {/* ==================== BENEFITS - ENHANCED WITH BENTO GRID ==================== */}
+            <section className="bg-white py-20 md:py-28">
                 <div className="container mx-auto px-4">
                     <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-10 md:mb-12">
-                            <div className="inline-block px-4 py-1.5 bg-pink-50 text-pink-700 rounded-full text-sm font-medium mb-3">
-                                ⭐ BEST SELLER
-                            </div>
-                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                                Pilihan Terpopuler
+                        <div className="text-center mb-16">
+                            <h2 className="font-playfair text-4xl md:text-6xl font-bold text-gray-900 mb-4">
+                                Kenapa Memilih Kami?
                             </h2>
-                            <p className="text-gray-600 max-w-2xl mx-auto">
-                                Produk terfavorit yang selalu dipilih oleh
-                                pelanggan kami
+                            <p className="font-poppins text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+                                Pengalaman terbaik di setiap langkah perjalanan
+                                Anda bersama kami
                             </p>
                         </div>
 
-                        {loading ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {[1, 2, 3, 4].map((i) => (
-                                    <div key={i} className="animate-pulse">
-                                        <div className="bg-gray-200 rounded-xl aspect-[3/4] mb-3"></div>
-                                        <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                                        <div className="h-6 bg-gray-200 rounded w-1/2"></div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {bestSellerProducts.map((product) => (
-                                    <ProductCard
-                                        key={product.id}
-                                        product={product}
-                                    />
-                                ))}
-                            </div>
-                        )}
-
-                        <div className="text-center mt-10">
-                            <Link
-                                href="/catalog"
-                                className="inline-flex items-center gap-2 px-6 py-3 bg-white text-pink-600 border border-pink-200 rounded-lg hover:border-pink-300 hover:bg-pink-50 transition-all duration-300 font-medium group"
-                            >
-                                <span>Lihat Semua Produk</span>
-                                <FaChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ==================== BENEFITS SECTION ==================== */}
-            <section className="bg-gradient-to-b from-pink-50 to-white py-16 md:py-20">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-10 md:mb-12">
-                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                                Mengapa Memilih Kami?
-                            </h2>
-                            <p className="text-gray-600 max-w-2xl mx-auto">
-                                Komitmen kami untuk memberikan pengalaman
-                                terbaik dalam setiap pesanan
-                            </p>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {/* Bento Grid Layout */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {benefits.map((benefit, index) => (
                                 <div
                                     key={index}
-                                    className="group bg-white rounded-xl p-5 border border-gray-100 hover:border-pink-200 transition-all duration-300 hover:shadow-lg"
+                                    className={`group relative bg-gradient-to-br from-white to-gray-50 rounded-3xl p-8 border border-gray-100 hover:border-pink-200 transition-all duration-500 hover-lift overflow-hidden ${
+                                        index === 0
+                                            ? "md:col-span-2 md:row-span-2"
+                                            : ""
+                                    }`}
                                 >
-                                    <div
-                                        className={`w-12 h-12 ${benefit.bgColor} rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300`}
-                                    >
-                                        <div className={benefit.color}>
-                                            {benefit.icon}
+                                    {/* Background Pattern */}
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-pink-100 to-rose-100 rounded-full filter blur-3xl opacity-0 group-hover:opacity-50 transition-opacity duration-500"></div>
+
+                                    <div className="relative">
+                                        {/* Icon */}
+                                        <div
+                                            className={`inline-flex items-center justify-center w-16 h-16 ${benefit.bgColor} rounded-2xl mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}
+                                        >
+                                            <div
+                                                className={`${benefit.color} text-2xl`}
+                                            >
+                                                {benefit.icon}
+                                            </div>
                                         </div>
+
+                                        {/* Content */}
+                                        <h3 className="font-playfair text-2xl font-bold text-gray-900 mb-3">
+                                            {benefit.title}
+                                        </h3>
+                                        <p className="font-poppins text-gray-600 leading-relaxed">
+                                            {benefit.description}
+                                        </p>
+
+                                        {/* Decorative Element for Large Card */}
+                                        {index === 0 && (
+                                            <div className="mt-6 flex items-center gap-2 text-pink-600 font-medium group-hover:gap-3 transition-all">
+                                                <span className="font-poppins">
+                                                    Pelajari lebih lanjut
+                                                </span>
+                                                <FaChevronRight className="w-4 h-4" />
+                                            </div>
+                                        )}
                                     </div>
-                                    <h3 className="text-lg font-bold text-gray-900 mb-2">
-                                        {benefit.title}
-                                    </h3>
-                                    <p className="text-gray-600 text-sm leading-relaxed">
-                                        {benefit.description}
-                                    </p>
                                 </div>
                             ))}
                         </div>
@@ -474,44 +721,119 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* ==================== PROCESS SECTION ==================== */}
-            <section className="bg-white py-16 md:py-20">
+            {/* ==================== BEST SELLER - ENHANCED ==================== */}
+            <section className="bg-gradient-to-b from-pink-50 to-white py-20 md:py-28">
                 <div className="container mx-auto px-4">
                     <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-10 md:mb-12">
-                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                                Cara Pemesanan Mudah
+                        <div className="text-center mb-16">
+                            <div className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-700 rounded-full text-sm font-semibold mb-6 shadow-sm">
+                                <span className="text-xl">⭐</span>
+                                <span className="font-poppins">TERPOPULER</span>
+                            </div>
+                            <h2 className="font-playfair text-4xl md:text-6xl font-bold text-gray-900 mb-4">
+                                Pilihan Favorit
                             </h2>
-                            <p className="text-gray-600 max-w-2xl mx-auto">
-                                Hanya 4 langkah sederhana untuk mendapatkan
-                                bouquet impian Anda
+                            <p className="font-poppins text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+                                Produk yang paling banyak dipilih dan dicintai
+                                pelanggan kami
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {processSteps.map((step, index) => (
-                                <div key={index} className="relative group">
+                        {loading ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                                {[1, 2, 3, 4].map((i) => (
+                                    <div key={i} className="animate-pulse">
+                                        <div className="bg-gray-200 rounded-2xl aspect-[3/4] mb-4"></div>
+                                        <div className="h-4 bg-gray-200 rounded mb-3"></div>
+                                        <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                                {bestSellerProducts.map((product, index) => (
                                     <div
-                                        className={`bg-gradient-to-br ${step.color} rounded-xl p-5 md:p-6 text-white h-full transform group-hover:-translate-y-1 transition-all duration-300`}
+                                        key={product.id}
+                                        className="opacity-0 animate-slide-up"
+                                        style={{
+                                            animationDelay: `${index * 0.1}s`,
+                                        }}
                                     >
-                                        <div className="text-3xl mb-3">
-                                            {step.icon}
-                                        </div>
-                                        <div className="text-2xl font-bold text-white/30 mb-3">
+                                        <ProductCard product={product} />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="text-center mt-12">
+                            <Link
+                                href="/catalog"
+                                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-full hover:from-pink-700 hover:to-rose-700 transition-all duration-300 font-semibold shadow-xl hover:shadow-pink-500/50 hover-lift group"
+                            >
+                                <span className="font-poppins">
+                                    Lihat Semua Koleksi
+                                </span>
+                                <FaChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ==================== PROCESS STEPS - ENHANCED ==================== */}
+            <section className="bg-white py-20 md:py-28 relative overflow-hidden">
+                {/* Background Decoration */}
+                <div className="absolute top-0 left-0 w-96 h-96 bg-pink-100 rounded-full filter blur-3xl opacity-30"></div>
+                <div className="absolute bottom-0 right-0 w-96 h-96 bg-rose-100 rounded-full filter blur-3xl opacity-30"></div>
+
+                <div className="container mx-auto px-4 relative z-10">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="text-center mb-16">
+                            <h2 className="font-playfair text-4xl md:text-6xl font-bold text-gray-900 mb-4">
+                                Cara Pemesanan
+                            </h2>
+                            <p className="font-poppins text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+                                Proses sederhana untuk mendapatkan bouquet
+                                impian Anda
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {processSteps.map((step, index) => (
+                                <div
+                                    key={index}
+                                    className="relative group opacity-0 animate-scale-in"
+                                    style={{
+                                        animationDelay: `${index * 0.15}s`,
+                                    }}
+                                >
+                                    {/* Card */}
+                                    <div className="relative bg-white rounded-3xl p-8 border-2 border-gray-100 hover:border-pink-300 transition-all duration-300 hover-lift h-full">
+                                        {/* Step Number Badge */}
+                                        <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg rotate-12 group-hover:rotate-0 transition-transform">
                                             {step.step}
                                         </div>
-                                        <h3 className="text-lg font-bold mb-2">
+
+                                        {/* Icon */}
+                                        <div className="text-6xl mb-6 group-hover:scale-110 transition-transform">
+                                            {step.icon}
+                                        </div>
+
+                                        {/* Title */}
+                                        <h3 className="font-playfair text-2xl font-bold text-gray-900 mb-3">
                                             {step.title}
                                         </h3>
-                                        <p className="text-white/90 text-sm leading-relaxed">
+
+                                        {/* Description */}
+                                        <p className="font-poppins text-gray-600 leading-relaxed">
                                             {step.description}
                                         </p>
                                     </div>
 
-                                    {/* Connector line (desktop only) */}
+                                    {/* Connector Arrow (desktop only) */}
                                     {index < processSteps.length - 1 && (
-                                        <div className="hidden lg:block absolute top-1/2 right-0 transform translate-x-1/2 -translate-y-1/2 z-10">
-                                            <div className="w-8 h-1 bg-gradient-to-r from-pink-200 to-rose-200 group-hover:from-pink-300 group-hover:to-rose-300 transition-all duration-300"></div>
+                                        <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-20">
+                                            <FaChevronRight className="w-6 h-6 text-pink-300" />
                                         </div>
                                     )}
                                 </div>
@@ -521,115 +843,148 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* ==================== QUALITY PROMISE SECTION ==================== */}
-            <section className="bg-gradient-to-b from-white to-pink-50 py-16 md:py-20">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-4xl mx-auto text-center">
-                        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-pink-100 to-rose-100 rounded-full mb-4">
-                            <FaLeaf className="w-8 h-8 text-emerald-500" />
+            {/* ==================== TESTIMONIALS - ENHANCED CAROUSEL ==================== */}
+            <section className="bg-gradient-to-br from-pink-600 via-rose-600 to-pink-700 py-20 md:py-28 relative overflow-hidden">
+                <div className="absolute inset-0 bg-noise"></div>
+
+                <div className="container mx-auto px-4 relative z-10">
+                    <div className="max-w-5xl mx-auto">
+                        <div className="text-center mb-16">
+                            <h2 className="font-playfair text-4xl md:text-6xl font-bold text-white mb-4">
+                                Cerita Pelanggan
+                            </h2>
+                            <p className="font-poppins text-lg md:text-xl text-pink-100 max-w-2xl mx-auto">
+                                Ribuan pelanggan puas telah mempercayai kami
+                            </p>
                         </div>
-                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                            Bunga Segar & Berkualitas
-                        </h2>
-                        <p className="text-lg text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-                            Dipetik dengan penuh hati untuk momen spesial Anda
-                        </p>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mt-10">
-                            <div className="text-center">
-                                <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-50 rounded-xl flex items-center justify-center mx-auto mb-3">
-                                    <FaCheck className="w-6 h-6 text-blue-500" />
-                                </div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                                    Fresh Daily
-                                </h3>
-                                <p className="text-gray-600 text-sm">
-                                    Bunga segar langsung dari supplier
-                                    terpercaya
-                                </p>
-                            </div>
+                        {/* Testimonial Carousel */}
+                        <div className="relative">
+                            {testimonials.map((testi, index) => (
+                                <div
+                                    key={index}
+                                    className={`transition-all duration-500 ${
+                                        index === activeTestimonial
+                                            ? "opacity-100 scale-100"
+                                            : "opacity-0 scale-95 absolute inset-0"
+                                    }`}
+                                >
+                                    <div className="bg-white/10 backdrop-blur-md rounded-3xl p-10 md:p-12 border border-white/20">
+                                        {/* Quote Icon */}
+                                        <FaQuoteLeft className="w-12 h-12 text-pink-200 mb-6" />
 
-                            <div className="text-center">
-                                <div className="w-14 h-14 bg-gradient-to-br from-emerald-100 to-emerald-50 rounded-xl flex items-center justify-center mx-auto mb-3">
-                                    <FaTruck className="w-6 h-6 text-emerald-500" />
-                                </div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                                    Same Day Delivery
-                                </h3>
-                                <p className="text-gray-600 text-sm">
-                                    Pesan sebelum jam 2 siang, terima hari yang
-                                    sama
-                                </p>
-                            </div>
+                                        {/* Stars */}
+                                        <div className="flex gap-1 mb-6">
+                                            {[...Array(5)].map((_, i) => (
+                                                <FaStar
+                                                    key={i}
+                                                    className="w-6 h-6 text-yellow-400 fill-current"
+                                                />
+                                            ))}
+                                        </div>
 
-                            <div className="text-center">
-                                <div className="w-14 h-14 bg-gradient-to-br from-amber-100 to-amber-50 rounded-xl flex items-center justify-center mx-auto mb-3">
-                                    <FaHeart className="w-6 h-6 text-amber-500" />
+                                        {/* Comment */}
+                                        <p className="font-poppins text-2xl md:text-3xl text-white mb-8 leading-relaxed italic">
+                                            "{testi.comment}"
+                                        </p>
+
+                                        {/* Author Info */}
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-16 h-16 bg-gradient-to-br from-pink-400 to-rose-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                                                    {testi.avatar}
+                                                </div>
+                                                <div>
+                                                    <div className="font-playfair text-xl font-bold text-white">
+                                                        {testi.name}
+                                                    </div>
+                                                    <div className="font-poppins text-pink-200">
+                                                        {testi.role}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="hidden md:block font-poppins text-sm text-pink-200 bg-white/10 px-4 py-2 rounded-full">
+                                                {testi.product}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                                    Handmade with Love
-                                </h3>
-                                <p className="text-gray-600 text-sm">
-                                    Dirangkai dengan penuh perhatian dan
-                                    keahlian
-                                </p>
+                            ))}
+
+                            {/* Navigation Dots */}
+                            <div className="flex justify-center gap-3 mt-8">
+                                {testimonials.map((_, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() =>
+                                            setActiveTestimonial(index)
+                                        }
+                                        className={`transition-all duration-300 rounded-full ${
+                                            index === activeTestimonial
+                                                ? "w-12 h-3 bg-white"
+                                                : "w-3 h-3 bg-white/40 hover:bg-white/60"
+                                        }`}
+                                    />
+                                ))}
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* ==================== TESTIMONIALS SECTION ==================== */}
-            <section className="bg-white py-16 md:py-20">
+            {/* ==================== QUALITY PROMISE - ENHANCED ==================== */}
+            <section className="bg-gradient-to-b from-white to-pink-50 py-20 md:py-28">
                 <div className="container mx-auto px-4">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-10 md:mb-12">
-                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                                Kata Pelanggan Kami
+                    <div className="max-w-6xl mx-auto">
+                        <div className="text-center mb-16">
+                            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full mb-6 shadow-xl">
+                                <FaLeaf className="w-10 h-10 text-white" />
+                            </div>
+                            <h2 className="font-playfair text-4xl md:text-6xl font-bold text-gray-900 mb-4">
+                                Jaminan Kualitas Premium
                             </h2>
-                            <p className="text-gray-600 max-w-2xl mx-auto">
-                                Cerita bahagia dari mereka yang mempercayakan
-                                momen spesialnya kepada kami
+                            <p className="font-poppins text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                                Dipetik dengan penuh hati, dirangkai dengan
+                                keahlian, dikirim dengan cinta
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {testimonials.map((testi, index) => (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {[
+                                {
+                                    icon: <FaCheck className="w-8 h-8" />,
+                                    title: "Fresh Daily",
+                                    desc: "Bunga segar langsung dari supplier terpercaya",
+                                    color: "from-blue-500 to-cyan-500",
+                                },
+                                {
+                                    icon: <FaTruck className="w-8 h-8" />,
+                                    title: "Same Day Delivery",
+                                    desc: "Pesan sebelum jam 2 siang, terima hari yang sama",
+                                    color: "from-emerald-500 to-green-500",
+                                },
+                                {
+                                    icon: <FaHeart className="w-8 h-8" />,
+                                    title: "Handmade with Love",
+                                    desc: "Dirangkai dengan penuh perhatian dan keahlian",
+                                    color: "from-pink-500 to-rose-500",
+                                },
+                            ].map((item, index) => (
                                 <div
                                     key={index}
-                                    className="bg-gradient-to-br from-white to-pink-50 rounded-xl border border-pink-100 p-5 md:p-6 hover:border-pink-200 transition-all duration-300 hover:shadow-lg"
+                                    className="group bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover-lift border border-gray-100"
                                 >
-                                    <div className="flex items-center mb-3">
-                                        {[...Array(5)].map((_, i) => (
-                                            <span
-                                                key={i}
-                                                className="text-yellow-500 mr-1"
-                                            >
-                                                ⭐
-                                            </span>
-                                        ))}
+                                    <div
+                                        className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br ${item.color} rounded-2xl mb-6 text-white group-hover:scale-110 group-hover:rotate-6 transition-all`}
+                                    >
+                                        {item.icon}
                                     </div>
-                                    <p className="text-gray-700 mb-4 text-sm leading-relaxed italic">
-                                        "{testi.comment}"
+                                    <h3 className="font-playfair text-2xl font-bold text-gray-900 mb-3">
+                                        {item.title}
+                                    </h3>
+                                    <p className="font-poppins text-gray-600 leading-relaxed">
+                                        {item.desc}
                                     </p>
-                                    <div className="flex items-center justify-between border-t border-pink-100 pt-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full flex items-center justify-center text-white font-bold">
-                                                {testi.avatar}
-                                            </div>
-                                            <div>
-                                                <div className="font-bold text-gray-900 text-sm">
-                                                    {testi.name}
-                                                </div>
-                                                <div className="text-xs text-gray-500">
-                                                    {testi.role}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="text-xs text-pink-600 font-medium">
-                                            {testi.product}
-                                        </div>
-                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -637,43 +992,71 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* ==================== CTA SECTION ==================== */}
-            <section className="bg-gradient-to-r from-pink-600 via-rose-600 to-pink-700 py-16 md:py-20 relative overflow-hidden">
-                <div className="absolute inset-0 bg-[radial-gradient(#ffffff10_1px,transparent_1px)] [background-size:30px_30px] opacity-10"></div>
+            {/* ==================== CTA SECTION - ENHANCED ==================== */}
+            <section className="bg-gradient-to-br from-pink-600 via-rose-600 to-pink-700 py-20 md:py-28 relative overflow-hidden">
+                <div className="absolute inset-0 bg-noise"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1),transparent_50%)]"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(255,255,255,0.1),transparent_50%)]"></div>
 
-                <div className="container mx-auto px-4 relative">
+                <div className="container mx-auto px-4 relative z-10">
                     <div className="max-w-4xl mx-auto text-center">
-                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                            Siap Berikan{" "}
-                            <span className="text-yellow-300">Kejutan?</span>
+                        <div className="inline-flex items-center gap-2 px-5 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-semibold mb-8 border border-white/30">
+                            <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></span>
+                            <span className="font-poppins">READY TO ORDER</span>
+                        </div>
+
+                        <h2 className="font-playfair text-4xl md:text-6xl font-bold text-white mb-6">
+                            Wujudkan Momen Spesial
+                            <span className="block text-yellow-300 mt-2">
+                                Bersama Kami
+                            </span>
                         </h2>
-                        <p className="text-lg text-pink-100 mb-8 leading-relaxed max-w-2xl mx-auto">
-                            Hubungi kami sekarang untuk konsultasi gratis dan
-                            wujudkan bucket bunga impian Anda
+
+                        <p className="font-poppins text-xl md:text-2xl text-pink-100 mb-12 leading-relaxed max-w-2xl mx-auto">
+                            Konsultasi gratis untuk membantu Anda memilih bucket
+                            bunga yang sempurna
                         </p>
 
-                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
                             <button
                                 onClick={handleWhatsAppClick}
-                                className="group px-8 py-4 bg-white text-pink-700 rounded-lg hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 font-bold text-base"
+                                className="group px-10 py-5 bg-white text-pink-700 rounded-full hover:bg-pink-50 transition-all duration-300 shadow-2xl hover:shadow-white/30 flex items-center justify-center gap-3 font-bold text-lg hover-lift"
                             >
-                                <FaWhatsapp className="w-6 h-6" />
-                                <span>Chat via WhatsApp</span>
-                                <FaChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                <FaWhatsapp className="w-7 h-7" />
+                                <span className="font-poppins">
+                                    Chat via WhatsApp
+                                </span>
+                                <FaChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </button>
 
                             <Link
                                 href="/catalog"
-                                className="px-8 py-4 border-2 border-white text-white rounded-lg hover:bg-white/10 transition-all duration-300 font-bold text-base"
+                                className="px-10 py-5 border-2 border-white text-white rounded-full hover:bg-white/10 transition-all duration-300 font-bold text-lg backdrop-blur-sm hover-lift text-center"
                             >
-                                Lihat Katalog Lengkap
+                                <span className="font-poppins">
+                                    Lihat Katalog Lengkap
+                                </span>
                             </Link>
                         </div>
 
-                        <p className="text-pink-200 text-xs md:text-sm mt-6">
-                            ⚡ Response dalam 5 menit • 🕒 Buka 24/7 • 🎁 Gratis
-                            Konsultasi
-                        </p>
+                        {/* Trust Badges */}
+                        <div className="flex flex-wrap items-center justify-center gap-6 text-pink-100">
+                            <div className="flex items-center gap-2 font-poppins">
+                                <span className="text-2xl">⚡</span>
+                            </div>
+                            <div className="w-1 h-1 bg-pink-300 rounded-full hidden sm:block"></div>
+                            <div className="flex items-center gap-2 font-poppins">
+                                <span className="text-2xl">🕒</span>
+                                <span className="font-medium">Buka 24/7</span>
+                            </div>
+                            <div className="w-1 h-1 bg-pink-300 rounded-full hidden sm:block"></div>
+                            <div className="flex items-center gap-2 font-poppins">
+                                <span className="text-2xl">🎁</span>
+                                <span className="font-medium">
+                                    Gratis Konsultasi
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

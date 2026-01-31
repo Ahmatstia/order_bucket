@@ -2,66 +2,100 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-/* Custom base styles */
+/* =========================
+   BASE STYLES
+   ========================= */
 @layer base {
     body {
-        @apply text-gray-800 antialiased;
+        @apply font-sans text-gray-800 antialiased bg-white;
     }
+
     h1,
     h2,
     h3,
     h4,
     h5,
     h6 {
-        @apply font-bold;
+        font-family: "Bitter", serif;
+        @apply font-bold text-gray-900;
+    }
+
+    p {
+        @apply leading-relaxed;
     }
 }
 
-/* Custom components */
+/* =========================
+   COMPONENTS
+   ========================= */
 @layer components {
+    /* Button */
     .btn {
-        @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+        @apply inline-flex items-center justify-center
+        px-4 py-2 rounded-lg font-medium
+        transition-colors duration-200
+        min-h-[44px] min-w-[44px];
     }
+
     .btn-primary {
         @apply bg-primary-600 text-white hover:bg-primary-700;
     }
+
     .btn-outline {
         @apply border border-primary-600 text-primary-600 hover:bg-primary-50;
     }
+
+    /* Card */
     .card {
         @apply bg-white rounded-xl shadow-md overflow-hidden;
     }
-}
 
-/* Mobile-specific styles */
-@layer utilities {
-    /* Touch-friendly tap targets */
-    .btn {
-        @apply min-h-[44px] min-w-[44px]; /* Minimum touch target size */
+    /* Product Card */
+    .product-card {
+        @apply card transition-transform duration-300 hover:-translate-y-1;
     }
 
-    /* Prevent text selection on buttons */
-    .btn,
-    button {
+    /* ❗ FIX DI SINI */
+    .product-title {
+        font-family: "Bitter", serif;
+        @apply text-lg font-semibold text-gray-900;
+    }
+
+    .product-price {
+        @apply text-primary-600 font-semibold;
+    }
+}
+
+/* =========================
+   UTILITIES
+   ========================= */
+@layer utilities {
+    button,
+    .btn {
         @apply select-none;
     }
 
-    /* Better scrolling on mobile */
     .overflow-touch {
         -webkit-overflow-scrolling: touch;
     }
 
-    /* Hide scrollbar but keep functionality */
     .scrollbar-hide {
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
+
     .scrollbar-hide::-webkit-scrollbar {
         display: none;
     }
+
+    .font-script {
+        font-family: "Ephesis", cursive;
+    }
 }
 
-/* Improve mobile typography */
+/* =========================
+   MOBILE TYPOGRAPHY
+   ========================= */
 @media (max-width: 640px) {
     h1 {
         font-size: 2rem;
@@ -71,9 +105,5 @@
     h2 {
         font-size: 1.5rem;
         line-height: 2rem;
-    }
-
-    .text-balance {
-        text-wrap: balance;
     }
 }
