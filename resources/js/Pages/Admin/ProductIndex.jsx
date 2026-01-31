@@ -17,6 +17,7 @@ export default function ProductIndex() {
     // Multiple images state
     const [imagePreviews, setImagePreviews] = useState([]);
     const [imageFiles, setImageFiles] = useState([]);
+    const [existingImageIds, setExistingImageIds] = useState([]); // ← TAMBAH INI
 
     useEffect(() => {
         fetchProducts();
@@ -27,6 +28,17 @@ export default function ProductIndex() {
         try {
             const response = await fetch("/api/products");
             const data = await response.json();
+            console.log("📦 Admin: Products data from API:", data);
+
+            // Debug: cek gambar pertama
+            if (data.length > 0 && data[0].images) {
+                console.log("🖼️ Admin: First product images:", data[0].images);
+                console.log(
+                    "🔗 Admin: First image URL:",
+                    data[0].images[0]?.image_url,
+                );
+            }
+
             setProducts(data);
         } catch (error) {
             console.error("Error fetching products:", error);
@@ -47,7 +59,11 @@ export default function ProductIndex() {
             files.forEach((file) => {
                 const reader = new FileReader();
                 reader.onloadend = () => {
-                    newPreviews.push(reader.result);
+                    newPreviews.push({
+                        type: "new", // Tandai sebagai gambar baru
+                        url: reader.result,
+                        file: file,
+                    });
 
                     if (newPreviews.length === files.length) {
                         setImagePreviews((prev) => [...prev, ...newPreviews]);
@@ -59,20 +75,30 @@ export default function ProductIndex() {
     };
 
     const removeImagePreview = (index) => {
+        const previewToRemove = imagePreviews[index];
+
+        if (previewToRemove.type === "existing") {
+            // Jika gambar existing, hapus dari array existingImageIds
+            setExistingImageIds((prev) =>
+                prev.filter((id) => id !== previewToRemove.imageId),
+            );
+        } else {
+            // Jika gambar baru, hapus dari imageFiles
+            const newFiles = [...imageFiles];
+            newFiles.splice(index - existingImageIds.length, 1); // Adjust index
+            setImageFiles(newFiles);
+        }
+
+        // Hapus dari previews
         const newPreviews = [...imagePreviews];
-        const newFiles = [...imageFiles];
         newPreviews.splice(index, 1);
-        newFiles.splice(index, 1);
         setImagePreviews(newPreviews);
-        setImageFiles(newFiles);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         const url = editingId ? `/api/products/${editingId}` : "/api/products";
-
-        const method = editingId ? "PUT" : "POST";
 
         try {
             const csrfToken = document.querySelector(
@@ -81,8 +107,7 @@ export default function ProductIndex() {
 
             const formData = new FormData();
 
-            // For PUT method with FormData
-            if (method === "PUT") {
+            if (editingId) {
                 formData.append("_method", "PUT");
             }
 
@@ -93,10 +118,32 @@ export default function ProductIndex() {
             formData.append("stock", form.stock);
             formData.append("is_active", form.is_active ? "1" : "0");
 
-            // Append multiple images
+            // Append gambar baru
             imageFiles.forEach((file, index) => {
                 formData.append(`images[${index}]`, file);
             });
+
+            // Untuk update, kita perlu handle gambar yang dihapus
+            if (editingId) {
+                const originalProduct = products.find(
+                    (p) => p.id === editingId,
+                );
+                if (originalProduct && originalProduct.images) {
+                    // Simpan ID gambar yang akan dipertahankan
+                    const keptImageIds = existingImageIds;
+                    const deletedImageIds = originalProduct.images
+                        .filter((img) => !keptImageIds.includes(img.id))
+                        .map((img) => img.id);
+
+                    // Kirim ID gambar yang dihapus (opsional)
+                    if (deletedImageIds.length > 0) {
+                        formData.append(
+                            "deleted_image_ids",
+                            JSON.stringify(deletedImageIds),
+                        );
+                    }
+                }
+            }
 
             const headers = {
                 Accept: "application/json",
@@ -107,10 +154,8 @@ export default function ProductIndex() {
                 headers["X-CSRF-TOKEN"] = csrfToken;
             }
 
-            const fetchMethod = method === "PUT" ? "POST" : method;
-
             const response = await fetch(url, {
-                method: fetchMethod,
+                method: editingId ? "POST" : "POST",
                 headers: headers,
                 credentials: "same-origin",
                 body: formData,
@@ -142,6 +187,8 @@ export default function ProductIndex() {
     };
 
     const handleEdit = (product) => {
+        console.log("✏️ Editing product:", product);
+
         setForm({
             name: product.name,
             category: product.category,
@@ -151,15 +198,31 @@ export default function ProductIndex() {
             is_active: product.is_active,
         });
 
+        // Reset semua state gambar
+        setImagePreviews([]);
+        setImageFiles([]);
+        setExistingImageIds([]);
+
         // Set image previews from existing images
         if (product.images && product.images.length > 0) {
-            const previews = product.images.map((img) => img.image_url);
+            console.log("🖼️ Setting existing images for edit:", product.images);
+
+            const previews = product.images.map((img) => ({
+                type: "existing",
+                url: getImageUrl(img),
+                imageId: img.id,
+                imagePath: img.image_path,
+            }));
+
+            const imageIds = product.images.map((img) => img.id);
+
             setImagePreviews(previews);
+            setExistingImageIds(imageIds);
         } else {
+            console.log("⚠️ Product has no existing images");
             setImagePreviews([]);
         }
 
-        setImageFiles([]);
         setEditingId(product.id);
     };
 
@@ -179,6 +242,9 @@ export default function ProductIndex() {
 
             if (response.ok) {
                 await fetchProducts();
+                if (editingId === id) {
+                    resetForm();
+                }
                 alert("Produk berhasil dihapus!");
             }
         } catch (error) {
@@ -202,8 +268,20 @@ export default function ProductIndex() {
             });
 
             if (response.ok) {
-                await fetchProducts();
+                // Update previews dengan menghapus gambar yang dihapus
+                setImagePreviews((prev) =>
+                    prev.filter(
+                        (p) => p.type !== "existing" || p.imageId !== imageId,
+                    ),
+                );
+                setExistingImageIds((prev) =>
+                    prev.filter((id) => id !== imageId),
+                );
+
                 alert("Gambar berhasil dihapus!");
+
+                // Refresh data produk
+                await fetchProducts();
             }
         } catch (error) {
             console.error("Error deleting image:", error);
@@ -222,6 +300,7 @@ export default function ProductIndex() {
         });
         setImagePreviews([]);
         setImageFiles([]);
+        setExistingImageIds([]);
         setEditingId(null);
     };
 
@@ -235,6 +314,17 @@ export default function ProductIndex() {
         { value: "mixed", label: "Mixed Flowers" },
         { value: "custom", label: "Custom Order" },
     ];
+
+    // Fungsi untuk mendapatkan image URL dengan fallback
+    const getImageUrl = (image) => {
+        if (image.image_url) {
+            return image.image_url;
+        }
+        if (image.image_path) {
+            return `http://localhost:8000/storage/${image.image_path}`;
+        }
+        return "/images/placeholder.jpg";
+    };
 
     return (
         <AppLayout>
@@ -254,7 +344,7 @@ export default function ProductIndex() {
                         <div className="card p-6">
                             <h2 className="text-xl font-bold mb-6">
                                 {editingId
-                                    ? "Edit Produk"
+                                    ? `Edit Produk: ${form.name}`
                                     : "Tambah Produk Baru"}
                             </h2>
 
@@ -363,7 +453,9 @@ export default function ProductIndex() {
                                     {/* Multiple Image Upload */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Gambar Produk (Bisa upload multiple)
+                                            Gambar Produk{" "}
+                                            {editingId &&
+                                                "(Gambar existing akan dipertahankan)"}
                                         </label>
 
                                         {/* Image Previews */}
@@ -378,7 +470,7 @@ export default function ProductIndex() {
                                                             >
                                                                 <img
                                                                     src={
-                                                                        preview
+                                                                        preview.url
                                                                     }
                                                                     alt={`Preview ${index + 1}`}
                                                                     className="w-full h-full object-cover rounded-lg border border-gray-200"
@@ -394,6 +486,12 @@ export default function ProductIndex() {
                                                                 >
                                                                     ✕
                                                                 </button>
+                                                                {preview.type ===
+                                                                    "existing" && (
+                                                                    <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center py-0.5">
+                                                                        Existing
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         ),
                                                     )}
@@ -422,7 +520,7 @@ export default function ProductIndex() {
                                                 </div>
                                                 <p className="text-sm text-gray-600">
                                                     {imagePreviews.length > 0
-                                                        ? `Upload gambar lagi (${imagePreviews.length} terpilih)`
+                                                        ? `Upload gambar ${editingId ? "tambahan" : ""} (${imagePreviews.length} terpilih)`
                                                         : "Klik untuk upload gambar"}
                                                 </p>
                                                 <p className="text-xs text-gray-400 mt-1">
@@ -432,52 +530,18 @@ export default function ProductIndex() {
                                             </label>
                                         </div>
 
-                                        {/* Existing images (for edit mode) */}
+                                        {/* Info */}
                                         {editingId &&
-                                            products.find(
-                                                (p) => p.id === editingId,
-                                            )?.images?.length > 0 && (
-                                                <div className="mt-4">
-                                                    <p className="text-sm text-gray-600 mb-2">
-                                                        Gambar yang sudah ada:
-                                                    </p>
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {products
-                                                            .find(
-                                                                (p) =>
-                                                                    p.id ===
-                                                                    editingId,
-                                                            )
-                                                            ?.images?.map(
-                                                                (img) => (
-                                                                    <div
-                                                                        key={
-                                                                            img.id
-                                                                        }
-                                                                        className="relative"
-                                                                    >
-                                                                        <img
-                                                                            src={
-                                                                                img.image_url
-                                                                            }
-                                                                            alt="Product"
-                                                                            className="w-12 h-12 object-cover rounded border"
-                                                                        />
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() =>
-                                                                                handleDeleteImage(
-                                                                                    img.id,
-                                                                                )
-                                                                            }
-                                                                            className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 text-xs"
-                                                                        >
-                                                                            ✕
-                                                                        </button>
-                                                                    </div>
-                                                                ),
-                                                            )}
-                                                    </div>
+                                            existingImageIds.length > 0 && (
+                                                <div className="mt-3 text-sm text-gray-600">
+                                                    <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded">
+                                                        ✓{" "}
+                                                        {
+                                                            existingImageIds.length
+                                                        }{" "}
+                                                        gambar existing akan
+                                                        dipertahankan
+                                                    </span>
                                                 </div>
                                             )}
                                     </div>
@@ -520,7 +584,7 @@ export default function ProductIndex() {
                                                 onClick={resetForm}
                                                 className="btn btn-outline"
                                             >
-                                                Batal
+                                                Batal Edit
                                             </button>
                                         )}
                                     </div>
@@ -530,14 +594,15 @@ export default function ProductIndex() {
 
                         <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                             <p className="text-blue-800 text-sm">
-                                <span className="font-bold">FITUR BARU:</span>{" "}
-                                Multiple image upload aktif! Bisa upload
-                                beberapa gambar sekaligus untuk produk.
+                                <span className="font-bold">INFO EDIT:</span>{" "}
+                                Gambar existing ditampilkan dengan label
+                                "Existing". Klik ✕ untuk menghapus, upload untuk
+                                menambah gambar baru.
                             </p>
                         </div>
                     </div>
 
-                    {/* Products List */}
+                    {/* Products List - SAMA seperti sebelumnya */}
                     <div className="lg:col-span-2">
                         <div className="card p-6">
                             <div className="flex justify-between items-center mb-6">
@@ -571,152 +636,201 @@ export default function ProductIndex() {
                                     </p>
                                 </div>
                             ) : (
-                                <div className="overflow-x-auto">
-                                    <table className="min-w-full divide-y divide-gray-200">
-                                        <thead>
-                                            <tr>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Produk
-                                                </th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Gambar
-                                                </th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Harga
-                                                </th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Stok
-                                                </th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Status
-                                                </th>
-                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Aksi
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-200">
-                                            {products.map((product) => (
-                                                <tr key={product.id}>
-                                                    <td className="px-4 py-3">
-                                                        <div>
-                                                            <div className="font-medium text-gray-900">
-                                                                {product.name}
-                                                            </div>
-                                                            <div className="text-sm text-gray-500 truncate max-w-xs">
-                                                                {
-                                                                    product.description
-                                                                }
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-3">
-                                                        <div className="flex -space-x-2">
-                                                            {product.images
-                                                                ?.slice(0, 3)
-                                                                .map(
-                                                                    (
-                                                                        img,
-                                                                        idx,
-                                                                    ) => (
-                                                                        <div
-                                                                            key={
-                                                                                img.id
-                                                                            }
-                                                                            className="w-8 h-8 rounded-full border-2 border-white overflow-hidden"
-                                                                        >
-                                                                            <img
-                                                                                src={
-                                                                                    img.image_url
-                                                                                }
-                                                                                alt=""
-                                                                                className="w-full h-full object-cover"
-                                                                            />
-                                                                        </div>
-                                                                    ),
-                                                                )}
-                                                            {product.images
-                                                                ?.length >
-                                                                3 && (
-                                                                <div className="w-8 h-8 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-xs">
-                                                                    +
-                                                                    {product
-                                                                        .images
-                                                                        .length -
-                                                                        3}
-                                                                </div>
-                                                            )}
-                                                            {(!product.images ||
-                                                                product.images
-                                                                    .length ===
-                                                                    0) && (
-                                                                <div className="w-8 h-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-xs">
-                                                                    📷
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-3">
-                                                        <div className="font-medium">
-                                                            Rp{" "}
-                                                            {parseFloat(
-                                                                product.price,
-                                                            ).toLocaleString(
-                                                                "id-ID",
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-3">
-                                                        <div
-                                                            className={
-                                                                product.stock >
-                                                                5
-                                                                    ? "text-green-600 font-medium"
-                                                                    : "text-yellow-600 font-medium"
-                                                            }
-                                                        >
-                                                            {product.stock} pcs
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-3">
-                                                        {product.is_active ? (
-                                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                                Aktif
-                                                            </span>
-                                                        ) : (
-                                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                                Nonaktif
-                                                            </span>
-                                                        )}
-                                                    </td>
-                                                    <td className="px-4 py-3">
-                                                        <div className="flex space-x-2">
-                                                            <button
-                                                                onClick={() =>
-                                                                    handleEdit(
-                                                                        product,
-                                                                    )
-                                                                }
-                                                                className="text-primary-600 hover:text-primary-900 text-sm font-medium"
-                                                            >
-                                                                Edit
-                                                            </button>
-                                                            <button
-                                                                onClick={() =>
-                                                                    handleDelete(
-                                                                        product.id,
-                                                                    )
-                                                                }
-                                                                className="text-red-600 hover:text-red-900 text-sm font-medium"
-                                                            >
-                                                                Hapus
-                                                            </button>
-                                                        </div>
-                                                    </td>
+                                <div className="overflow-hidden">
+                                    {/* Scrollable Container */}
+                                    <div
+                                        className="overflow-y-auto"
+                                        style={{
+                                            maxHeight:
+                                                products.length > 10
+                                                    ? "600px"
+                                                    : "auto",
+                                        }}
+                                    >
+                                        <table className="min-w-full divide-y divide-gray-200">
+                                            <thead className="bg-gray-50 sticky top-0">
+                                                <tr>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                                                        Produk
+                                                    </th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                                                        Gambar
+                                                    </th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                                                        Harga
+                                                    </th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                                                        Stok
+                                                    </th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                                                        Status
+                                                    </th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                                                        Aksi
+                                                    </th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-200 bg-white">
+                                                {products.map((product) => (
+                                                    <tr
+                                                        key={product.id}
+                                                        className={
+                                                            editingId ===
+                                                            product.id
+                                                                ? "bg-blue-50"
+                                                                : "hover:bg-gray-50"
+                                                        }
+                                                    >
+                                                        <td className="px-4 py-3">
+                                                            <div>
+                                                                <div className="font-medium text-gray-900">
+                                                                    {
+                                                                        product.name
+                                                                    }
+                                                                </div>
+                                                                <div className="text-sm text-gray-500 truncate max-w-xs">
+                                                                    {
+                                                                        product.description
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <div className="flex -space-x-2">
+                                                                {product.images
+                                                                    ?.slice(
+                                                                        0,
+                                                                        3,
+                                                                    )
+                                                                    .map(
+                                                                        (
+                                                                            img,
+                                                                            idx,
+                                                                        ) => (
+                                                                            <div
+                                                                                key={
+                                                                                    img.id
+                                                                                }
+                                                                                className="w-8 h-8 rounded-full border-2 border-white overflow-hidden"
+                                                                            >
+                                                                                <img
+                                                                                    src={getImageUrl(
+                                                                                        img,
+                                                                                    )}
+                                                                                    alt=""
+                                                                                    className="w-full h-full object-cover"
+                                                                                    onError={(
+                                                                                        e,
+                                                                                    ) => {
+                                                                                        console.error(
+                                                                                            "❌ Admin: Table image failed:",
+                                                                                            e
+                                                                                                .target
+                                                                                                .src,
+                                                                                        );
+                                                                                        e.target.src =
+                                                                                            "/images/placeholder.jpg";
+                                                                                    }}
+                                                                                />
+                                                                            </div>
+                                                                        ),
+                                                                    )}
+                                                                {product.images
+                                                                    ?.length >
+                                                                    3 && (
+                                                                    <div className="w-8 h-8 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-xs">
+                                                                        +
+                                                                        {product
+                                                                            .images
+                                                                            .length -
+                                                                            3}
+                                                                    </div>
+                                                                )}
+                                                                {(!product.images ||
+                                                                    product
+                                                                        .images
+                                                                        .length ===
+                                                                        0) && (
+                                                                    <div className="w-8 h-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-xs">
+                                                                        📷
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <div className="font-medium">
+                                                                Rp{" "}
+                                                                {parseFloat(
+                                                                    product.price,
+                                                                ).toLocaleString(
+                                                                    "id-ID",
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <div
+                                                                className={
+                                                                    product.stock >
+                                                                    5
+                                                                        ? "text-green-600 font-medium"
+                                                                        : "text-yellow-600 font-medium"
+                                                                }
+                                                            >
+                                                                {product.stock}{" "}
+                                                                pcs
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            {product.is_active ? (
+                                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                                    Aktif
+                                                                </span>
+                                                            ) : (
+                                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                                    Nonaktif
+                                                                </span>
+                                                            )}
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <div className="flex space-x-2">
+                                                                <button
+                                                                    onClick={() =>
+                                                                        handleEdit(
+                                                                            product,
+                                                                        )
+                                                                    }
+                                                                    className="text-primary-600 hover:text-primary-900 text-sm font-medium"
+                                                                >
+                                                                    Edit
+                                                                </button>
+                                                                <button
+                                                                    onClick={() =>
+                                                                        handleDelete(
+                                                                            product.id,
+                                                                        )
+                                                                    }
+                                                                    className="text-red-600 hover:text-red-900 text-sm font-medium"
+                                                                >
+                                                                    Hapus
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* Pagination Info */}
+                                    {products.length > 10 && (
+                                        <div className="mt-4 text-sm text-gray-500 text-center">
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-gray-100">
+                                                📜 {products.length} produk •
+                                                Scroll untuk melihat lebih
+                                                banyak
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

@@ -40,8 +40,41 @@ export const CartProvider = ({ children }) => {
         0,
     );
 
-    // Add item to cart
+    // Fungsi untuk mendapatkan gambar utama dari produk
+    const getPrimaryImage = (product) => {
+        if (product.images && product.images.length > 0) {
+            // Cari gambar primary
+            const primaryImage = product.images.find((img) => img.is_primary);
+            if (primaryImage) {
+                return {
+                    image_url: primaryImage.image_url,
+                    image_path: primaryImage.image_path,
+                };
+            }
+            // Jika tidak ada primary, ambil gambar pertama
+            const firstImage = product.images[0];
+            return {
+                image_url: firstImage.image_url,
+                image_path: firstImage.image_path,
+            };
+        }
+        return {
+            image_url: product.image_url || null,
+            image_path: null,
+        };
+    };
+
+    // Add item to cart (DENGAN GAMBAR YANG BENAR)
     const addToCart = (product, quantity = 1) => {
+        console.log("🛒 Adding to cart:", {
+            productId: product.id,
+            productName: product.name,
+            images: product.images,
+            image_url: product.image_url,
+        });
+
+        const primaryImage = getPrimaryImage(product);
+
         setCartItems((prevItems) => {
             // Check if product already in cart
             const existingItemIndex = prevItems.findIndex(
@@ -52,17 +85,29 @@ export const CartProvider = ({ children }) => {
                 // Update quantity if exists
                 const updatedItems = [...prevItems];
                 updatedItems[existingItemIndex].quantity += quantity;
+                // Update juga gambar jika ada perubahan
+                updatedItems[existingItemIndex].images = product.images;
+                updatedItems[existingItemIndex].image_url =
+                    primaryImage.image_url;
+                updatedItems[existingItemIndex].image_path =
+                    primaryImage.image_path;
                 return updatedItems;
             } else {
-                // Add new item
+                // Add new item with FULL product data
                 const newItem = {
                     id: product.id,
                     name: product.name,
                     price: parseFloat(product.price),
                     quantity: quantity,
-                    image_url: product.image_url || null,
                     category: product.category || "bucket",
+                    // Simpan semua data gambar
+                    images: product.images || [],
+                    image_url: primaryImage.image_url,
+                    image_path: primaryImage.image_path,
+                    // Simpan data lengkap untuk debugging
+                    product_data: product,
                 };
+                console.log("🛒 New cart item:", newItem);
                 return [...prevItems, newItem];
             }
         });
@@ -125,6 +170,33 @@ export const CartProvider = ({ children }) => {
         return cartItems.some((item) => item.id === productId);
     };
 
+    // Fungsi helper untuk mendapatkan gambar di cart
+    const getCartItemImage = (cartItem) => {
+        // Priority 1: image_url langsung
+        if (cartItem.image_url) {
+            return cartItem.image_url;
+        }
+
+        // Priority 2: dari images array
+        if (cartItem.images && cartItem.images.length > 0) {
+            const primaryImage = cartItem.images.find((img) => img.is_primary);
+            if (primaryImage && primaryImage.image_url) {
+                return primaryImage.image_url;
+            }
+            if (cartItem.images[0] && cartItem.images[0].image_url) {
+                return cartItem.images[0].image_url;
+            }
+        }
+
+        // Priority 3: dari image_path
+        if (cartItem.image_path) {
+            return `http://localhost:8000/storage/${cartItem.image_path}`;
+        }
+
+        // Priority 4: null (akan render emoji)
+        return null;
+    };
+
     const value = {
         cartItems,
         cartTotal,
@@ -137,6 +209,7 @@ export const CartProvider = ({ children }) => {
         clearCart,
         getItemQuantity,
         isInCart,
+        getCartItemImage, // Export fungsi ini
     };
 
     return (

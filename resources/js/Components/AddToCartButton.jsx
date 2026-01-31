@@ -24,24 +24,26 @@ export default function AddToCartButton({ product }) {
 
     if (alreadyInCart) {
         return (
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center justify-between bg-primary-50 rounded-xl p-2">
                 <button
                     onClick={() => decrementQuantity(product.id)}
-                    className="w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                    className="w-8 h-8 flex items-center justify-center bg-white hover:bg-gray-100 text-gray-700 rounded-lg transition-colors border shadow-sm"
+                    title="Kurangi"
                 >
                     -
                 </button>
 
-                <div className="flex-1 text-center">
-                    <div className="font-medium text-gray-900">
-                        {quantityInCart} item
+                <div className="flex flex-col items-center">
+                    <div className="font-semibold text-primary-700 text-sm">
+                        {quantityInCart}
                     </div>
-                    <div className="text-xs text-gray-500">di keranjang</div>
+                    <div className="text-xs text-gray-500">keranjang</div>
                 </div>
 
                 <button
                     onClick={() => incrementQuantity(product.id)}
-                    className="w-10 h-10 flex items-center justify-center bg-primary-100 hover:bg-primary-200 text-primary-700 rounded-lg transition-colors"
+                    className="w-8 h-8 flex items-center justify-center bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors shadow-sm"
+                    title="Tambah"
                 >
                     +
                 </button>
@@ -52,14 +54,12 @@ export default function AddToCartButton({ product }) {
     return (
         <button
             onClick={handleAddToCart}
-            className={`btn w-full flex items-center justify-center gap-2 bg-gradient-to-r from-primary-500 to-pink-500 hover:from-primary-600 hover:to-pink-600 text-white text-sm md:text-base py-3 rounded-xl shadow-md hover:shadow-lg transition-all ${isAnimating ? "animate-bounce" : ""}`}
+            className={`btn w-full h-12 flex items-center justify-center gap-2 bg-gradient-to-r from-primary-500 to-pink-500 hover:from-primary-600 hover:to-pink-600 text-white text-sm py-3 rounded-xl shadow-md hover:shadow-lg transition-all ${isAnimating ? "animate-bounce" : ""}`}
         >
-            <span
-                className={`transition-transform ${isAnimating ? "scale-125" : ""}`}
-            >
+            <span className={`text-lg ${isAnimating ? "scale-125" : ""}`}>
                 🛒
             </span>
-            <span className="font-semibold">Tambah ke Keranjang</span>
+            <span className="font-semibold">Tambah</span>
         </button>
     );
 }

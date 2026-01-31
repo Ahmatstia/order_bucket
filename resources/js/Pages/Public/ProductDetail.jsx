@@ -7,18 +7,15 @@ import OnboardingModal from "../../Components/OnboardingModal";
 import WhatsAppFloatingButton from "../../Components/WhatsAppFloatingButton";
 
 export default function ProductDetail({ productId }) {
-    // ← productId dari props Inertia
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
+    const [productImages, setProductImages] = useState([]);
 
     const { addToCart, getItemQuantity } = useCart();
     const [customerName] = useLocalStorage("customer_name", "");
-
-    // Mock images (nanti bisa dari database)
-    const [productImages, setProductImages] = useState([]);
 
     useEffect(() => {
         if (productId) {
@@ -29,6 +26,8 @@ export default function ProductDetail({ productId }) {
     const fetchProduct = async () => {
         try {
             setLoading(true);
+            console.log(`🔄 Fetching product ${productId}...`);
+
             const response = await fetch(`/api/products/${productId}`);
 
             if (!response.ok) {
@@ -36,27 +35,52 @@ export default function ProductDetail({ productId }) {
             }
 
             const data = await response.json();
+            console.log("📦 Product data from API:", data);
             setProduct(data);
 
+            // Handle images dari database
             if (data.images && data.images.length > 0) {
-                const images = data.images.map((img) => img.image_url);
-                setProductImages(images);
-            } else if (data.image_url) {
-                setProductImages([data.image_url]);
-            } else {
-                setProductImages([
-                    "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?auto=format&fit=crop&w=800",
-                    "https://images.unsplash.com/photo-1519378058457-4c29a0a2efac?auto=format&fit=crop&w=800",
-                    "https://images.unsplash.com/photo-1464207687429-7505649dae38?auto=format&fit=crop&w=800",
-                ]);
-            }
+                console.log("🖼️ Product has images:", data.images);
 
-            // Jika produk punya image_url, tambahkan ke images list
-            if (data.image_url) {
-                productImages.unshift(data.image_url);
+                // Ambil semua image_url dari array images
+                const images = data.images
+                    .map((img) => {
+                        // Debug setiap gambar
+                        console.log("Image data:", {
+                            id: img.id,
+                            image_path: img.image_path,
+                            image_url: img.image_url,
+                            is_primary: img.is_primary,
+                        });
+
+                        // Gunakan image_url jika ada, jika tidak generate dari image_path
+                        if (img.image_url) {
+                            return img.image_url;
+                        } else if (img.image_path) {
+                            // Generate URL manual
+                            return `http://localhost:8000/storage/${img.image_path}`;
+                        }
+                        return null;
+                    })
+                    .filter((url) => url !== null); // Filter out null values
+
+                console.log("✅ Processed images URLs:", images);
+                setProductImages(images);
+
+                // Set selected image ke primary jika ada
+                const primaryIndex = data.images.findIndex(
+                    (img) => img.is_primary,
+                );
+                if (primaryIndex !== -1) {
+                    setSelectedImage(primaryIndex);
+                }
+            } else {
+                console.log("⚠️ Product has no images");
+                // Fallback ke gambar placeholder lokal
+                setProductImages(["/images/placeholder.jpg"]);
             }
         } catch (error) {
-            console.error("Error fetching product:", error);
+            console.error("❌ Error fetching product:", error);
             setError(error.message);
 
             // Fallback dummy data untuk development
@@ -84,6 +108,9 @@ export default function ProductDetail({ productId }) {
                     "Hindarkan dari buah yang menghasilkan ethylene",
                 ],
             });
+
+            // Fallback images
+            setProductImages(["/images/placeholder.jpg"]);
         } finally {
             setLoading(false);
         }
@@ -187,33 +214,111 @@ export default function ProductDetail({ productId }) {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
                     {/* Product Images */}
                     <div>
+                        {/* Debug Info */}
+                        {productImages.length === 0 && (
+                            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <p className="text-yellow-800 text-sm">
+                                    ⚠️ Produk ini belum memiliki gambar.
+                                </p>
+                            </div>
+                        )}
+
                         {/* Main Image */}
                         <div className="mb-4">
                             <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl overflow-hidden h-80 md:h-96">
-                                <img
-                                    src={productImages[selectedImage]}
-                                    alt={product.name}
-                                    className="w-full h-full object-cover"
-                                />
+                                {productImages.length > 0 ? (
+                                    <img
+                                        src={productImages[selectedImage]}
+                                        alt={product.name}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            console.error(
+                                                "❌ Gambar gagal load:",
+                                                e.target.src,
+                                            );
+                                            // Coba URL alternatif jika ada image_path
+                                            if (
+                                                product.images &&
+                                                product.images[selectedImage]
+                                                    ?.image_path
+                                            ) {
+                                                const altUrl = `http://localhost:8000/storage/${product.images[selectedImage].image_path}`;
+                                                console.log(
+                                                    "🔄 Coba URL alternatif:",
+                                                    altUrl,
+                                                );
+                                                e.target.src = altUrl;
+                                            } else {
+                                                // Show placeholder
+                                                e.target.onerror = null;
+                                                e.target.src =
+                                                    "/images/placeholder.jpg";
+                                            }
+                                        }}
+                                        onLoad={() =>
+                                            console.log(
+                                                "✅ Gambar berhasil load",
+                                            )
+                                        }
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                        <div className="text-center">
+                                            <span className="text-6xl mb-4">
+                                                💐
+                                            </span>
+                                            <p className="text-gray-500">
+                                                Gambar tidak tersedia
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
                         {/* Thumbnail Images */}
-                        <div className="flex gap-3 overflow-x-auto pb-2">
-                            {productImages.map((img, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => setSelectedImage(index)}
-                                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${selectedImage === index ? "border-primary-500" : "border-gray-200"}`}
-                                >
-                                    <img
-                                        src={img}
-                                        alt={`${product.name} ${index + 1}`}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </button>
-                            ))}
-                        </div>
+                        {productImages.length > 1 && (
+                            <div className="flex gap-3 overflow-x-auto pb-2">
+                                {productImages.map((img, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => setSelectedImage(index)}
+                                        className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${selectedImage === index ? "border-primary-500" : "border-gray-200"}`}
+                                    >
+                                        <img
+                                            src={img}
+                                            alt={`${product.name} ${index + 1}`}
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                                console.error(
+                                                    "Thumbnail gagal load:",
+                                                    e.target.src,
+                                                );
+                                                if (
+                                                    product.images &&
+                                                    product.images[index]
+                                                        ?.image_path
+                                                ) {
+                                                    e.target.src = `http://localhost:8000/storage/${product.images[index].image_path}`;
+                                                } else {
+                                                    e.target.onerror = null;
+                                                    e.target.src =
+                                                        "/images/placeholder.jpg";
+                                                }
+                                            }}
+                                        />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Image Counter */}
+                        {productImages.length > 0 && (
+                            <div className="mt-3 text-sm text-gray-600">
+                                Gambar {selectedImage + 1} dari{" "}
+                                {productImages.length}
+                            </div>
+                        )}
 
                         {/* Product Tags */}
                         <div className="flex flex-wrap gap-2 mt-6">
@@ -227,6 +332,11 @@ export default function ProductDetail({ productId }) {
                                     ? "🟢 Stok Tersedia"
                                     : "🟡 Stok Terbatas"}
                             </span>
+                            {product.images && product.images.length > 0 && (
+                                <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+                                    📸 {product.images.length} gambar
+                                </span>
+                            )}
                             <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
                                 ⭐ {product.rating || "4.5"}
                             </span>
@@ -447,9 +557,9 @@ export default function ProductDetail({ productId }) {
                 {/* Development Note */}
                 <div className="mt-12 p-4 bg-purple-50 border border-purple-200 rounded-lg">
                     <p className="text-purple-800 text-sm">
-                        <span className="font-bold">FITUR BARU:</span> Halaman
-                        detail produk sudah aktif! Klik produk di katalog untuk
-                        melihat detail lengkap.
+                        <span className="font-bold">FITUR BARU:</span> Multiple
+                        images support aktif! Produk bisa memiliki beberapa
+                        gambar.
                     </p>
                 </div>
             </div>

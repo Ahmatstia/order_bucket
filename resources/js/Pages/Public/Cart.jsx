@@ -15,6 +15,7 @@ export default function Cart() {
         incrementQuantity,
         decrementQuantity,
         clearCart,
+        getCartItemImage, // ← TAMBAHKAN INI
     } = useCart();
 
     const [customerName] = useLocalStorage("customer_name", "");
@@ -30,7 +31,7 @@ export default function Cart() {
             return;
         }
 
-        const phoneNumber = "6282371663414";
+        const phoneNumber = "6281234567890";
 
         // Build WhatsApp message
         let message = `Halo admin BucketBouquets! 😊\n\n`;
@@ -114,100 +115,140 @@ export default function Cart() {
                                 </div>
 
                                 <div className="space-y-4">
-                                    {cartItems.map((item) => (
-                                        <div
-                                            key={item.id}
-                                            className="flex items-start gap-4 p-4 border border-gray-200 rounded-xl hover:border-gray-300 transition-colors"
-                                        >
-                                            {/* Product Image */}
-                                            <div className="w-20 h-20 flex-shrink-0 bg-gradient-to-br from-primary-50 to-pink-50 rounded-lg flex items-center justify-center overflow-hidden">
-                                                {item.image_url ? (
-                                                    <img
-                                                        src={item.image_url}
-                                                        alt={item.name}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                ) : (
-                                                    <span className="text-2xl">
-                                                        💐
-                                                    </span>
-                                                )}
-                                            </div>
+                                    {cartItems.map((item) => {
+                                        const productImage =
+                                            getCartItemImage(item);
+                                        console.log("🛒 Cart Item:", {
+                                            id: item.id,
+                                            name: item.name,
+                                            images: item.images,
+                                            image_url: item.image_url,
+                                            image_path: item.image_path,
+                                            productImage: productImage,
+                                        });
 
-                                            {/* Product Info */}
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex justify-between">
-                                                    <div>
-                                                        <h3 className="font-bold text-gray-900 mb-1">
-                                                            {item.name}
-                                                        </h3>
-                                                        <p className="text-sm text-gray-500 mb-2">
-                                                            {item.category}
-                                                        </p>
-                                                    </div>
-                                                    <button
-                                                        onClick={() =>
-                                                            removeFromCart(
-                                                                item.id,
-                                                            )
-                                                        }
-                                                        className="text-gray-400 hover:text-red-500"
-                                                    >
-                                                        ✕
-                                                    </button>
+                                        return (
+                                            <div
+                                                key={item.id}
+                                                className="flex items-start gap-4 p-4 border border-gray-200 rounded-xl hover:border-gray-300 transition-colors"
+                                            >
+                                                {/* Product Image */}
+                                                <div className="w-20 h-20 flex-shrink-0 bg-gradient-to-br from-primary-50 to-pink-50 rounded-lg flex items-center justify-center overflow-hidden">
+                                                    {productImage ? (
+                                                        <img
+                                                            src={productImage}
+                                                            alt={item.name}
+                                                            className="w-full h-full object-cover"
+                                                            onError={(e) => {
+                                                                console.error(
+                                                                    "❌ Cart: Image failed to load:",
+                                                                    e.target
+                                                                        .src,
+                                                                );
+                                                                e.target.onerror =
+                                                                    null;
+                                                                e.target.style.display =
+                                                                    "none";
+                                                                const container =
+                                                                    e.target
+                                                                        .parentElement;
+                                                                container.innerHTML = `
+                                                                    <div class="w-full h-full flex items-center justify-center">
+                                                                        <span class="text-2xl">
+                                                                            💐
+                                                                        </span>
+                                                                    </div>
+                                                                `;
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center">
+                                                            <span className="text-2xl">
+                                                                💐
+                                                            </span>
+                                                        </div>
+                                                    )}
                                                 </div>
 
-                                                <div className="flex items-center justify-between mt-4">
-                                                    {/* Quantity Controls */}
-                                                    <div className="flex items-center gap-2">
+                                                {/* Product Info */}
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex justify-between">
+                                                        <div>
+                                                            <h3 className="font-bold text-gray-900 mb-1">
+                                                                {item.name}
+                                                            </h3>
+                                                            <p className="text-sm text-gray-500 mb-2">
+                                                                {item.category}
+                                                            </p>
+                                                        </div>
                                                         <button
                                                             onClick={() =>
-                                                                decrementQuantity(
+                                                                removeFromCart(
                                                                     item.id,
                                                                 )
                                                             }
-                                                            className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg"
+                                                            className="text-gray-400 hover:text-red-500"
                                                         >
-                                                            -
-                                                        </button>
-                                                        <span className="w-10 text-center font-medium">
-                                                            {item.quantity}
-                                                        </span>
-                                                        <button
-                                                            onClick={() =>
-                                                                incrementQuantity(
-                                                                    item.id,
-                                                                )
-                                                            }
-                                                            className="w-8 h-8 flex items-center justify-center bg-primary-100 hover:bg-primary-200 text-primary-700 rounded-lg"
-                                                        >
-                                                            +
+                                                            ✕
                                                         </button>
                                                     </div>
 
-                                                    {/* Price */}
-                                                    <div className="text-right">
-                                                        <div className="font-bold text-gray-900">
-                                                            Rp{" "}
-                                                            {(
-                                                                item.price *
-                                                                item.quantity
-                                                            ).toLocaleString(
-                                                                "id-ID",
-                                                            )}
+                                                    <div className="flex items-center justify-between mt-4">
+                                                        {/* Quantity Controls */}
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                onClick={() =>
+                                                                    decrementQuantity(
+                                                                        item.id,
+                                                                    )
+                                                                }
+                                                                className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg"
+                                                                disabled={
+                                                                    item.quantity <=
+                                                                    1
+                                                                }
+                                                            >
+                                                                -
+                                                            </button>
+                                                            <span className="w-10 text-center font-medium">
+                                                                {item.quantity}
+                                                            </span>
+                                                            <button
+                                                                onClick={() =>
+                                                                    incrementQuantity(
+                                                                        item.id,
+                                                                    )
+                                                                }
+                                                                className="w-8 h-8 flex items-center justify-center bg-primary-100 hover:bg-primary-200 text-primary-700 rounded-lg"
+                                                            >
+                                                                +
+                                                            </button>
                                                         </div>
-                                                        <div className="text-sm text-gray-500">
-                                                            Rp{" "}
-                                                            {item.price.toLocaleString(
-                                                                "id-ID",
-                                                            )}{" "}
-                                                            / item
+
+                                                        {/* Price */}
+                                                        <div className="text-right">
+                                                            <div className="font-bold text-gray-900">
+                                                                Rp{" "}
+                                                                {(
+                                                                    item.price *
+                                                                    item.quantity
+                                                                ).toLocaleString(
+                                                                    "id-ID",
+                                                                )}
+                                                            </div>
+                                                            <div className="text-sm text-gray-500">
+                                                                Rp{" "}
+                                                                {item.price.toLocaleString(
+                                                                    "id-ID",
+                                                                )}{" "}
+                                                                / item
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
 
                                 {/* Continue Shopping Button */}
@@ -335,19 +376,34 @@ export default function Cart() {
                                             {cartItems.length}
                                         </span>
                                     </div>
+                                    <div className="flex justify-between text-sm text-gray-500 mt-1">
+                                        <span>Total Quantity:</span>
+                                        <span className="font-medium">
+                                            {cartItems.reduce(
+                                                (total, item) =>
+                                                    total + item.quantity,
+                                                0,
+                                            )}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 )}
 
-                {/* Development Note */}
-                <div className="mt-12 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-green-800 text-sm">
-                        <span className="font-bold">FITUR BARU:</span> Keranjang
-                        belanja sudah aktif! Coba tambah beberapa produk dan
-                        checkout via WhatsApp.
+                {/* Debug Info */}
+                <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                    <p className="text-purple-800 text-sm">
+                        <span className="font-bold">Debug Info:</span>{" "}
+                        {cartCount} items in cart. Check console for cart data.
                     </p>
+                    <button
+                        onClick={() => console.log("🛒 Cart Items:", cartItems)}
+                        className="mt-2 text-xs bg-purple-100 hover:bg-purple-200 px-2 py-1 rounded"
+                    >
+                        Log Cart Data
+                    </button>
                 </div>
             </div>
 

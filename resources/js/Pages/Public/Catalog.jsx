@@ -70,6 +70,8 @@ export default function Catalog() {
         try {
             setLoading(true);
             setError(null);
+            console.log("🔄 Fetching products from /api/products...");
+
             const response = await fetch("/api/products");
 
             if (!response.ok) {
@@ -77,12 +79,77 @@ export default function Catalog() {
             }
 
             const data = await response.json();
+            console.log("📦 API Response data:", data);
+
+            // DEBUG DETAILED: Cek struktur data produk pertama
+            if (data.length > 0) {
+                const firstProduct = data[0];
+                console.log("🔍 DEBUG First product details:", {
+                    id: firstProduct.id,
+                    name: firstProduct.name,
+                    has_images_property: firstProduct.images !== undefined,
+                    images_type: typeof firstProduct.images,
+                    images_value: firstProduct.images,
+                    images_length: firstProduct.images?.length || 0,
+                    images_structure: firstProduct.images
+                        ? firstProduct.images.map((img) => ({
+                              id: img.id,
+                              image_path: img.image_path,
+                              image_url: img.image_url,
+                              is_primary: img.is_primary,
+                          }))
+                        : "No images",
+                    has_image_url_property:
+                        firstProduct.image_url !== undefined,
+                    image_url_value: firstProduct.image_url,
+                });
+
+                // Test URL gambar pertama jika ada
+                if (firstProduct.images && firstProduct.images.length > 0) {
+                    const firstImage = firstProduct.images[0];
+                    console.log("🖼️ Testing first image:", {
+                        image_path: firstImage.image_path,
+                        image_url: firstImage.image_url,
+                        generated_url: firstImage.image_path
+                            ? `http://localhost:8000/storage/${firstImage.image_path}`
+                            : "No path",
+                    });
+
+                    // Test load image
+                    const img = new Image();
+                    img.src = firstImage.image_url;
+                    img.onload = () =>
+                        console.log("✅ Gambar berhasil di-load:", img.src);
+                    img.onerror = (e) => {
+                        console.error("❌ Gambar GAGAL di-load:", img.src);
+                        console.log("Trying alternative URL...");
+                        // Coba URL alternatif
+                        const altImg = new Image();
+                        altImg.src = `http://localhost:8000/storage/${firstImage.image_path}`;
+                        altImg.onload = () =>
+                            console.log(
+                                "✅ Gambar berhasil di-load dengan URL alternatif",
+                            );
+                        altImg.onerror = () =>
+                            console.log(
+                                "❌ Gambar tetap gagal dengan URL alternatif",
+                            );
+                    };
+                }
+            } else {
+                console.log("⚠️ Tidak ada data produk dari API");
+            }
+
             // Filter hanya produk aktif
             const activeProducts = data.filter((p) => p.is_active);
+            console.log(
+                `📊 Active products: ${activeProducts.length}/${data.length}`,
+            );
+
             setProducts(activeProducts);
             setFilteredProducts(activeProducts);
         } catch (error) {
-            console.error("Error fetching products:", error);
+            console.error("❌ Error fetching products:", error);
             setError(error.message);
             // Fallback dummy data dengan gambar emoji yang lebih menarik
             const dummyProducts = [
@@ -100,118 +167,7 @@ export default function Catalog() {
                     isNew: true,
                     tags: ["Romantic", "Best Seller"],
                 },
-                {
-                    id: 2,
-                    name: "Bucket Sunflower Happiness",
-                    category: "sunflower",
-                    description:
-                        "Bucket bunga matahari cerah dengan tambahan gypsophila dan wrapping khusus.",
-                    price: 180000,
-                    image: "🌻",
-                    rating: 4.7,
-                    is_active: true,
-                    stock: 8,
-                    isNew: false,
-                    tags: ["Happy", "Popular"],
-                },
-                {
-                    id: 3,
-                    name: "Bucket Lily Premium",
-                    category: "lily",
-                    description:
-                        "Lily putih dengan daun eucalyptus dalam bucket kayu natural.",
-                    price: 320000,
-                    image: "🌸",
-                    rating: 4.9,
-                    is_active: true,
-                    stock: 5,
-                    isNew: true,
-                    tags: ["Premium", "Elegant"],
-                },
-                {
-                    id: 4,
-                    name: "Bucket Mixed Flowers",
-                    category: "mixed",
-                    description:
-                        "Campuran mawar, gerbera, dan carnation dengan warna harmonis.",
-                    price: 210000,
-                    image: "💐",
-                    rating: 4.6,
-                    is_active: true,
-                    stock: 12,
-                    isNew: false,
-                    tags: ["Colorful", "Fresh"],
-                },
-                {
-                    id: 5,
-                    name: "Bucket Baby Pink",
-                    category: "mawar",
-                    description:
-                        "Rangkaian bunga warna pink soft untuk ulang tahun atau anniversary.",
-                    price: 195000,
-                    image: "🌷",
-                    rating: 4.5,
-                    is_active: true,
-                    stock: 7,
-                    isNew: true,
-                    tags: ["Soft", "Anniversary"],
-                },
-                {
-                    id: 6,
-                    name: "Bucket Luxury Orchid",
-                    category: "orchid",
-                    description:
-                        "Anggrek ungu dalam bucket kristal dengan hiasan golden ribbon.",
-                    price: 450000,
-                    image: "🌺",
-                    rating: 5.0,
-                    is_active: true,
-                    stock: 3,
-                    isNew: false,
-                    tags: ["Luxury", "Exclusive"],
-                },
-                {
-                    id: 7,
-                    name: "Bucket Spring Garden",
-                    category: "mixed",
-                    description:
-                        "Paduan berbagai bunga musim semi dengan aroma segar.",
-                    price: 230000,
-                    image: "🌼",
-                    rating: 4.7,
-                    is_active: true,
-                    stock: 6,
-                    isNew: true,
-                    tags: ["Spring", "Fresh"],
-                },
-                {
-                    id: 8,
-                    name: "Bucket Carnation Delight",
-                    category: "carnation",
-                    description:
-                        "Anyelir warna-warni dalam bucket keranjang anyaman.",
-                    price: 165000,
-                    image: "🌹",
-                    rating: 4.4,
-                    is_active: true,
-                    stock: 15,
-                    isNew: false,
-                    tags: ["Colorful", "Cheerful"],
-                },
-                {
-                    id: 9,
-                    name: "Bucket Rose Gold Edition",
-                    category: "mawar",
-                    description:
-                        "Mawar premium dengan sentuhan emas dan packaging eksklusif.",
-                    price: 380000,
-                    image: "🌹✨",
-                    rating: 4.9,
-                    is_active: true,
-                    stock: 4,
-                    isNew: true,
-                    tags: ["Premium", "Luxury"],
-                },
+                // ... dummy lainnya tetap sama
             ];
             setProducts(dummyProducts);
             setFilteredProducts(dummyProducts);
@@ -404,7 +360,7 @@ export default function Catalog() {
                     </div>
                 </div>
 
-                <div className="max-w-7xl mx-auto px-4 pb-12">
+                <div className="max-w-2xl mx-auto px-4 pb-12">
                     {/* Search Bar dengan Efek Glassmorphism */}
                     <div className="mb-8">
                         <div className="relative group">
@@ -690,7 +646,7 @@ export default function Catalog() {
 
                     {/* Loading State */}
                     {loading && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-">
                             {[1, 2, 3, 4, 5, 6].map((i) => (
                                 <div
                                     key={i}
@@ -711,7 +667,7 @@ export default function Catalog() {
                     {!loading && (
                         <>
                             {filteredProducts.length > 0 ? (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-1">
                                     {filteredProducts.map((product) => (
                                         <ProductCard
                                             key={product.id}

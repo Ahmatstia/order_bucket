@@ -8,35 +8,36 @@ export default function ProductCard({ product }) {
 
     // Fungsi untuk mendapatkan gambar utama
     const getPrimaryImage = () => {
-        // Jika ada array images
         if (product.images && product.images.length > 0) {
-            // Cari gambar yang is_primary = true
-            const primaryImage = product.images.find((img) => img.is_primary);
-            if (primaryImage && primaryImage.image_url) {
-                return primaryImage.image_url;
+            const primary = product.images.find(
+                (img) => img.is_primary === true,
+            );
+            if (primary) {
+                if (primary.image_url) return primary.image_url;
+                if (primary.image_path) {
+                    return `http://localhost:8000/storage/${primary.image_path}`;
+                }
             }
-            // Jika tidak ada yang primary, ambil gambar pertama
-            if (product.images[0] && product.images[0].image_url) {
-                return product.images[0].image_url;
+
+            const firstImage = product.images[0];
+            if (firstImage) {
+                if (firstImage.image_url) return firstImage.image_url;
+                if (firstImage.image_path) {
+                    return `http://localhost:8000/storage/${firstImage.image_path}`;
+                }
             }
         }
 
-        // Fallback ke property lama (backward compatibility)
-        if (product.image_url) {
-            return product.image_url;
-        }
-
-        // Jika masih tidak ada, gunakan emoji
+        if (product.image_url) return product.image_url;
         return null;
     };
 
-    // Fungsi untuk mendapatkan jumlah gambar
     const getImageCount = () => {
         return product.images ? product.images.length : 0;
     };
 
     const handleWhatsAppOrder = () => {
-        const phoneNumber = "6281234567890";
+        const phoneNumber = "6282371663414";
         const message =
             `Halo admin BucketBouquets! 😊\n\n` +
             `Saya ${customerName || "Customer"} mau pesan:\n` +
@@ -65,13 +66,17 @@ export default function ProductCard({ product }) {
                                 className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                                 loading="lazy"
                                 onError={(e) => {
-                                    // Jika gambar gagal load, ganti dengan emoji
-                                    e.target.onerror = null;
+                                    if (product.images?.[0]?.image_path) {
+                                        e.target.src = `http://localhost:8000/storage/${product.images[0].image_path}`;
+                                        return;
+                                    }
                                     e.target.style.display = "none";
-                                    e.target.parentElement.innerHTML = `
-                                        <div class="text-center p-4 w-full">
+                                    const container = e.target.parentElement;
+                                    container.innerHTML = `
+                                        <div class="text-center p-4 w-full h-full flex flex-col items-center justify-center">
                                             <span class="text-5xl md:text-6xl mb-2">💐</span>
                                             <p class="text-gray-500 text-sm px-2">${product.name}</p>
+                                            <p class="text-xs text-red-500 mt-2">Gambar gagal dimuat</p>
                                         </div>
                                     `;
                                 }}
@@ -114,7 +119,7 @@ export default function ProductCard({ product }) {
                                     : "bg-yellow-100 text-yellow-800"
                             }`}
                         >
-                            {product.stock > 5 ? "🟢 Tersedia" : "🟡 Terbatas"}
+                            {product.stock > 5 ? "Tersedia" : "Terbatas"}
                         </span>
                     </div>
                 </div>
@@ -136,10 +141,6 @@ export default function ProductCard({ product }) {
                     </span>
                 </div>
 
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2 md:line-clamp-3">
-                    {product.description}
-                </p>
-
                 {/* Stats */}
                 <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                     <div className="flex items-center">
@@ -153,18 +154,20 @@ export default function ProductCard({ product }) {
                     </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="space-y-3">
-                    <AddToCartButton product={product} />
+                {/* Compact Action Buttons */}
+                <div className="flex gap-3">
+                    {/* Keranjang Utama */}
+                    <div className="flex-1">
+                        <AddToCartButton product={product} />
+                    </div>
 
+                    {/* WhatsApp Button - Icon Only */}
                     <button
                         onClick={handleWhatsAppOrder}
-                        className="btn w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm md:text-base py-3 rounded-xl border border-gray-300 transition-colors"
+                        title="Pesan via WhatsApp"
+                        className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 bg-green-100 hover:bg-green-200 text-green-700 rounded-xl border border-green-300 transition-all hover:scale-105 active:scale-95"
                     >
-                        <span className="text-green-600">💬</span>
-                        <span className="font-medium">
-                            Pesan Langsung via WA
-                        </span>
+                        <span className="text-xl">💬</span>
                     </button>
                 </div>
 
