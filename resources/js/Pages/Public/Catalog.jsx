@@ -18,6 +18,10 @@ import {
     FaCheck,
     FaSun,
     FaChevronDown,
+    FaHeart,
+    FaShieldAlt,
+    FaWhatsapp,
+    FaTruck,
 } from "react-icons/fa";
 
 export default function Catalog() {
@@ -254,8 +258,10 @@ export default function Catalog() {
             const query = searchQuery.toLowerCase();
             result = result.filter(
                 (product) =>
-                    product.name.toLowerCase().includes(query) ||
-                    product.description.toLowerCase().includes(query),
+                    (product.name &&
+                        product.name.toLowerCase().includes(query)) ||
+                    (product.description &&
+                        product.description.toLowerCase().includes(query)),
             );
         }
 
@@ -268,7 +274,9 @@ export default function Catalog() {
                 result.sort((a, b) => b.price - a.price);
                 break;
             case "name-asc":
-                result.sort((a, b) => a.name.localeCompare(b.name));
+                result.sort((a, b) =>
+                    (a.name || "").localeCompare(b.name || ""),
+                );
                 break;
             case "rating":
                 result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
@@ -315,14 +323,12 @@ export default function Catalog() {
     };
 
     const categoryColors = {
-        mawar: "border-l-4 border-l-rose-500 bg-gradient-to-r from-rose-50 to-white",
-        sunflower:
-            "border-l-4 border-l-amber-500 bg-gradient-to-r from-amber-50 to-white",
-        lily: "border-l-4 border-l-fuchsia-500 bg-gradient-to-r from-fuchsia-50 to-white",
-        mixed: "border-l-4 border-l-violet-500 bg-gradient-to-r from-violet-50 to-white",
-        orchid: "border-l-4 border-l-indigo-500 bg-gradient-to-r from-indigo-50 to-white",
-        carnation:
-            "border-l-4 border-l-red-500 bg-gradient-to-r from-red-50 to-white",
+        mawar: "from-rose-500 to-pink-500",
+        sunflower: "from-amber-500 to-orange-500",
+        lily: "from-fuchsia-500 to-pink-500",
+        mixed: "from-violet-500 to-purple-500",
+        orchid: "from-indigo-500 to-purple-500",
+        carnation: "from-red-500 to-rose-500",
     };
 
     const categoryIcons = {
@@ -335,31 +341,31 @@ export default function Catalog() {
     };
 
     const sortOptions = [
-        { value: "default", label: "Terbaru" },
-        { value: "price-low", label: "Harga: Rendah - Tinggi" },
-        { value: "price-high", label: "Harga: Tinggi - Rendah" },
-        { value: "name-asc", label: "Nama: A-Z" },
-        { value: "rating", label: "Rating Tertinggi" },
-        { value: "newest", label: "Produk Terbaru" },
+        { value: "default", label: "Terbaru", icon: "✨" },
+        { value: "price-low", label: "Harga: Rendah - Tinggi", icon: "↗️" },
+        { value: "price-high", label: "Harga: Tinggi - Rendah", icon: "↘️" },
+        { value: "name-asc", label: "Nama: A-Z", icon: "🔤" },
+        { value: "rating", label: "Rating Tertinggi", icon: "⭐" },
+        { value: "newest", label: "Produk Terbaru", icon: "🆕" },
     ];
 
     return (
         <AppLayout>
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap');
                 
-                .catalog-container {
-                    font-family: 'DM Sans', sans-serif;
+                .font-playfair {
+                    font-family: 'Playfair Display', serif;
                 }
                 
-                .catalog-heading {
-                    font-family: 'Playfair Display', serif;
+                .font-poppins {
+                    font-family: 'Poppins', sans-serif;
                 }
                 
                 @keyframes fadeInUp {
                     from {
                         opacity: 0;
-                        transform: translateY(20px);
+                        transform: translateY(30px);
                     }
                     to {
                         opacity: 1;
@@ -370,7 +376,7 @@ export default function Catalog() {
                 @keyframes slideInLeft {
                     from {
                         opacity: 0;
-                        transform: translateX(-20px);
+                        transform: translateX(-30px);
                     }
                     to {
                         opacity: 1;
@@ -388,6 +394,15 @@ export default function Catalog() {
                         transform: scale(1);
                     }
                 }
+
+                @keyframes shimmer {
+                    0% {
+                        background-position: -1000px 0;
+                    }
+                    100% {
+                        background-position: 1000px 0;
+                    }
+                }
                 
                 .animate-fadeInUp {
                     animation: fadeInUp 0.6s ease-out forwards;
@@ -401,21 +416,21 @@ export default function Catalog() {
                     animation: scaleIn 0.4s ease-out forwards;
                 }
                 
-                .stagger-1 { animation-delay: 0.1s; }
-                .stagger-2 { animation-delay: 0.2s; }
-                .stagger-3 { animation-delay: 0.3s; }
-                .stagger-4 { animation-delay: 0.4s; }
-                .stagger-5 { animation-delay: 0.5s; }
-                .stagger-6 { animation-delay: 0.6s; }
-                .stagger-7 { animation-delay: 0.7s; }
-                .stagger-8 { animation-delay: 0.8s; }
+                .delay-100 { animation-delay: 0.1s; opacity: 0; }
+                .delay-200 { animation-delay: 0.2s; opacity: 0; }
+                .delay-300 { animation-delay: 0.3s; opacity: 0; }
+                .delay-400 { animation-delay: 0.4s; opacity: 0; }
+                .delay-500 { animation-delay: 0.5s; opacity: 0; }
+                .delay-600 { animation-delay: 0.6s; opacity: 0; }
+                .delay-700 { animation-delay: 0.7s; opacity: 0; }
+                .delay-800 { animation-delay: 0.8s; opacity: 0; }
                 
                 .category-btn {
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
                 
                 .category-btn:hover {
-                    transform: translateY(-2px);
+                    transform: translateY(-3px);
                 }
                 
                 .category-btn.active {
@@ -423,7 +438,7 @@ export default function Catalog() {
                 }
                 
                 .search-input:focus {
-                    box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.1);
+                    box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.1);
                 }
                 
                 .filter-chip {
@@ -434,109 +449,87 @@ export default function Catalog() {
                     transform: scale(1.05);
                 }
                 
-                .glass-effect {
-                    background: rgba(255, 255, 255, 0.95);
-                    backdrop-filter: blur(10px);
-                    -webkit-backdrop-filter: blur(10px);
+                .bg-noise {
+                    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
                 }
-                
-                .gradient-border {
-                    position: relative;
-                }
-                
-                .gradient-border::before {
-                    content: '';
-                    position: absolute;
-                    inset: 0;
-                    border-radius: inherit;
-                    padding: 1px;
-                    background: linear-gradient(135deg, #f43f5e, #ec4899, #a855f7);
-                    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-                    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-                    -webkit-mask-composite: xor;
-                    mask-composite: exclude;
-                    opacity: 0;
-                    transition: opacity 0.3s ease;
-                }
-                
-                .gradient-border:hover::before {
-                    opacity: 1;
-                }
-                
-                .product-grid-enter {
-                    opacity: 0;
-                    transform: scale(0.9);
-                }
-                
-                .product-grid-enter-active {
-                    opacity: 1;
-                    transform: scale(1);
-                    transition: all 0.3s ease-out;
+
+                .skeleton-shimmer {
+                    background: linear-gradient(
+                        90deg,
+                        #f0f0f0 25%,
+                        #e0e0e0 50%,
+                        #f0f0f0 75%
+                    );
+                    background-size: 1000px 100%;
+                    animation: shimmer 2s infinite;
                 }
             `}</style>
 
-            <div className="catalog-container min-h-screen bg-gradient-to-br from-rose-50/30 via-white to-pink-50/20">
-                {/* Hero Header with Elegant Design */}
-                <div className="relative overflow-hidden bg-gradient-to-br from-rose-600 via-pink-500 to-rose-500">
-                    {/* Decorative Background Elements */}
-                    <div className="absolute inset-0 opacity-10">
-                        <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
-                        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl transform translate-x-1/2 translate-y-1/2"></div>
-                    </div>
+            <div className="min-h-screen bg-white font-poppins">
+                {/* ==================== HERO HEADER ==================== */}
+                <div className="relative overflow-hidden bg-gradient-to-br from-pink-600 via-rose-600 to-pink-700">
+                    {/* Background Decorations */}
+                    <div className="absolute inset-0 bg-noise"></div>
+                    <div className="absolute top-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
+                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl transform translate-x-1/2 translate-y-1/2"></div>
 
-                    <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-                        <div className="text-center animate-fadeInUp">
-                            <div className="inline-flex items-center justify-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full mb-6">
-                                <span className="text-white/90 text-sm font-medium">
-                                    ✨ Koleksi Premium 2025
+                    <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
+                        <div className="text-center">
+                            {/* Badge */}
+                            <div className="inline-flex items-center gap-2 px-5 py-2 bg-white/20 backdrop-blur-sm rounded-full mb-6 animate-fadeInUp">
+                                <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></span>
+                                <span className="text-white font-medium font-poppins text-sm">
+                                    Koleksi Premium 2026
                                 </span>
                             </div>
-                            <h1 className="catalog-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 tracking-tight">
-                                Bucket Bunga Pilihan
+
+                            {/* Heading */}
+                            <h1 className="font-playfair text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 tracking-tight animate-fadeInUp delay-100">
+                                Katalog Bucket Bunga
                             </h1>
-                            <p className="text-white/90 text-lg md:text-xl max-w-2xl mx-auto font-light">
+                            <p className="text-white/90 text-lg md:text-xl max-w-2xl mx-auto font-poppins leading-relaxed animate-fadeInUp delay-200">
                                 Rangkaian bucket bunga segar dengan desain
-                                elegan untuk momen spesial Anda
+                                elegan untuk setiap momen spesial Anda
                             </p>
 
                             {/* Stats */}
-                            <div className="flex flex-wrap items-center justify-center gap-6 mt-8">
-                                <div className="flex items-center space-x-2 text-white/90">
-                                    <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                                        <FaShoppingBag className="w-5 h-5" />
+                            <div className="flex flex-wrap items-center justify-center gap-8 mt-10 animate-fadeInUp delay-300">
+                                <div className="flex items-center gap-3 text-white">
+                                    <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                                        <FaShoppingBag className="w-6 h-6" />
                                     </div>
                                     <div className="text-left">
-                                        <div className="text-2xl font-bold">
+                                        <div className="text-3xl font-bold font-playfair">
                                             {products.length}+
                                         </div>
-                                        <div className="text-xs opacity-80">
-                                            Produk
+                                        <div className="text-sm opacity-90 font-poppins">
+                                            Produk Tersedia
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex items-center space-x-2 text-white/90">
-                                    <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                                        <FaStar className="w-5 h-5" />
+                                <div className="flex items-center gap-3 text-white">
+                                    <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                                        <FaStar className="w-6 h-6" />
                                     </div>
                                     <div className="text-left">
-                                        <div className="text-2xl font-bold">
-                                            4.8
+                                        <div className="text-3xl font-bold font-playfair">
+                                            4.9
                                         </div>
-                                        <div className="text-xs opacity-80">
-                                            Rating
+                                        <div className="text-sm opacity-90 font-poppins">
+                                            Rating Rata-rata
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex items-center space-x-2 text-white/90">
-                                    <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                                        <FaLeaf className="w-5 h-5" />
+                                <div className="flex items-center gap-3 text-white">
+                                    <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                                        <FaLeaf className="w-6 h-6" />
                                     </div>
                                     <div className="text-left">
-                                        <div className="text-2xl font-bold">
+                                        <div className="text-3xl font-bold font-playfair">
                                             100%
                                         </div>
-                                        <div className="text-xs opacity-80">
-                                            Segar
+                                        <div className="text-sm opacity-90 font-poppins">
+                                            Bunga Segar
                                         </div>
                                     </div>
                                 </div>
@@ -545,12 +538,12 @@ export default function Catalog() {
                     </div>
                 </div>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
-                    {/* Search Bar - Floating Card */}
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10">
+                    {/* ==================== SEARCH BAR ==================== */}
                     <div className="mb-8 animate-scaleIn">
-                        <div className="glass-effect rounded-2xl shadow-xl border border-white/50 p-2">
-                            <div className="flex items-center px-4 py-3">
-                                <FaSearch className="w-5 h-5 text-rose-400 mr-3 flex-shrink-0" />
+                        <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl border border-gray-100 p-2">
+                            <div className="flex items-center px-6 py-4">
+                                <FaSearch className="w-5 h-5 text-pink-500 mr-4 flex-shrink-0" />
                                 <input
                                     type="text"
                                     value={searchQuery}
@@ -560,27 +553,27 @@ export default function Catalog() {
                                     onFocus={() => setIsSearchFocused(true)}
                                     onBlur={() => setIsSearchFocused(false)}
                                     placeholder="Cari bucket bunga favorit Anda..."
-                                    className="search-input flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400 text-base font-medium"
+                                    className="search-input flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400 text-base font-medium font-poppins"
                                 />
                                 {searchQuery && (
                                     <button
                                         onClick={() => setSearchQuery("")}
-                                        className="ml-2 p-2 hover:bg-rose-50 rounded-full transition-colors flex-shrink-0"
+                                        className="ml-3 p-2 hover:bg-pink-50 rounded-full transition-colors flex-shrink-0"
                                     >
-                                        <FaTimes className="w-4 h-4 text-gray-400 hover:text-rose-500" />
+                                        <FaTimes className="w-4 h-4 text-gray-400 hover:text-pink-600" />
                                     </button>
                                 )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Filter & Sort Section */}
+                    {/* ==================== FILTER SECTION ==================== */}
                     <div className="mb-8">
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 md:p-8">
                             {/* Categories */}
-                            <div className="mb-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-base font-semibold text-gray-900">
+                            <div className="mb-8">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-xl font-bold text-gray-900 font-playfair">
                                         Kategori Produk
                                     </h3>
                                     <button
@@ -589,9 +582,9 @@ export default function Catalog() {
                                                 !showMobileFilters,
                                             )
                                         }
-                                        className="lg:hidden flex items-center space-x-2 px-3 py-2 bg-rose-50 text-rose-600 rounded-lg text-sm font-medium hover:bg-rose-100 transition-colors"
+                                        className="lg:hidden flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-50 to-rose-50 text-pink-600 rounded-xl text-sm font-semibold hover:from-pink-100 hover:to-rose-100 transition-all"
                                     >
-                                        <FaFilter className="w-3.5 h-3.5" />
+                                        <FaFilter className="w-4 h-4" />
                                         <span>Filter</span>
                                     </button>
                                 </div>
@@ -601,9 +594,9 @@ export default function Catalog() {
                                         onClick={() =>
                                             setSelectedCategory("all")
                                         }
-                                        className={`category-btn px-6 py-3 rounded-xl text-sm font-semibold transition-all ${
+                                        className={`category-btn px-6 py-3 rounded-xl text-sm font-semibold font-poppins transition-all ${
                                             selectedCategory === "all"
-                                                ? "bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg shadow-rose-200 active"
+                                                ? "bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg shadow-pink-200 active"
                                                 : "bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200"
                                         }`}
                                     >
@@ -615,9 +608,9 @@ export default function Catalog() {
                                             onClick={() =>
                                                 setSelectedCategory(category)
                                             }
-                                            className={`category-btn px-6 py-3 rounded-xl text-sm font-semibold transition-all flex items-center space-x-2 stagger-${index + 1} ${
+                                            className={`category-btn px-6 py-3 rounded-xl text-sm font-semibold font-poppins transition-all flex items-center gap-2 animate-scaleIn delay-${(index + 1) * 100} ${
                                                 selectedCategory === category
-                                                    ? `${categoryColors[category]} shadow-md active border`
+                                                    ? `bg-gradient-to-r ${categoryColors[category]} text-white shadow-lg active`
                                                     : "bg-white text-gray-700 hover:shadow-md border border-gray-200"
                                             }`}
                                         >
@@ -635,28 +628,25 @@ export default function Catalog() {
                             </div>
 
                             {/* Sort & View Options */}
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-6 border-t border-gray-100">
-                                <div className="flex items-center space-x-4">
-                                    {/* Results Count */}
-                                    <div className="flex items-center space-x-2">
-                                        <span className="text-sm text-gray-600">
-                                            Menampilkan{" "}
-                                            <span className="font-bold text-gray-900">
-                                                {filteredProducts.length}
-                                            </span>{" "}
-                                            produk
-                                        </span>
-                                    </div>
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-6 border-t border-gray-200">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm text-gray-600 font-poppins">
+                                        Menampilkan{" "}
+                                        <span className="font-bold text-pink-600">
+                                            {filteredProducts.length}
+                                        </span>{" "}
+                                        produk
+                                    </span>
                                 </div>
 
-                                <div className="flex items-center space-x-3">
+                                <div className="flex items-center gap-3">
                                     {/* View Mode Toggle */}
-                                    <div className="hidden sm:flex items-center bg-gray-100 rounded-lg p-1">
+                                    <div className="hidden sm:flex items-center bg-gray-100 rounded-xl p-1">
                                         <button
                                             onClick={() => setViewMode("grid")}
-                                            className={`p-2 rounded-md transition-colors ${
+                                            className={`p-2.5 rounded-lg transition-all ${
                                                 viewMode === "grid"
-                                                    ? "bg-white text-rose-600 shadow-sm"
+                                                    ? "bg-white text-pink-600 shadow-sm"
                                                     : "text-gray-500 hover:text-gray-700"
                                             }`}
                                         >
@@ -670,9 +660,9 @@ export default function Catalog() {
                                         </button>
                                         <button
                                             onClick={() => setViewMode("list")}
-                                            className={`p-2 rounded-md transition-colors ${
+                                            className={`p-2.5 rounded-lg transition-all ${
                                                 viewMode === "list"
-                                                    ? "bg-white text-rose-600 shadow-sm"
+                                                    ? "bg-white text-pink-600 shadow-sm"
                                                     : "text-gray-500 hover:text-gray-700"
                                             }`}
                                         >
@@ -698,7 +688,7 @@ export default function Catalog() {
                                                     !showSortDropdown,
                                                 )
                                             }
-                                            className="flex items-center space-x-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                                            className="flex items-center gap-2 px-5 py-3 bg-white border-2 border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:border-pink-200 hover:bg-pink-50 transition-all font-poppins"
                                         >
                                             <FaSortAmountDown className="w-4 h-4 text-gray-500" />
                                             <span>
@@ -716,7 +706,7 @@ export default function Catalog() {
                                         </button>
 
                                         {showSortDropdown && (
-                                            <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-10">
+                                            <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-10">
                                                 {sortOptions.map((option) => (
                                                     <button
                                                         key={option.value}
@@ -728,15 +718,20 @@ export default function Catalog() {
                                                                 false,
                                                             );
                                                         }}
-                                                        className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between ${
+                                                        className={`w-full text-left px-5 py-3 text-sm transition-all flex items-center justify-between font-poppins ${
                                                             sortBy ===
                                                             option.value
-                                                                ? "bg-rose-50 text-rose-600 font-medium"
+                                                                ? "bg-gradient-to-r from-pink-50 to-rose-50 text-pink-600 font-semibold"
                                                                 : "text-gray-700 hover:bg-gray-50"
                                                         }`}
                                                     >
-                                                        <span>
-                                                            {option.label}
+                                                        <span className="flex items-center gap-2">
+                                                            <span>
+                                                                {option.icon}
+                                                            </span>
+                                                            <span>
+                                                                {option.label}
+                                                            </span>
                                                         </span>
                                                         {sortBy ===
                                                             option.value && (
@@ -752,38 +747,38 @@ export default function Catalog() {
                         </div>
                     </div>
 
-                    {/* Active Filters */}
+                    {/* ==================== ACTIVE FILTERS ==================== */}
                     {activeFilters.length > 0 && (
                         <div className="mb-6 animate-slideInLeft">
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <span className="text-sm font-medium text-gray-700">
+                            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-5">
+                                <div className="flex flex-wrap items-center gap-3">
+                                    <span className="text-sm font-semibold text-gray-700 font-poppins">
                                         Filter Aktif:
                                     </span>
                                     {activeFilters.map((filter, index) => (
                                         <div
                                             key={index}
-                                            className="filter-chip inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-rose-50 to-pink-50 rounded-lg border border-rose-100"
+                                            className="filter-chip inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-50 to-rose-50 rounded-xl border border-pink-200"
                                         >
-                                            <span className="text-sm">
+                                            <span className="text-base">
                                                 {filter.icon}
                                             </span>
-                                            <span className="text-sm text-rose-700 font-medium">
+                                            <span className="text-sm text-pink-700 font-semibold font-poppins">
                                                 {filter.label}
                                             </span>
                                             <button
                                                 onClick={() =>
                                                     removeFilter(filter.type)
                                                 }
-                                                className="p-1 hover:bg-rose-200 rounded-full transition-colors"
+                                                className="p-1 hover:bg-pink-200 rounded-full transition-colors"
                                             >
-                                                <FaTimes className="w-3 h-3 text-rose-500" />
+                                                <FaTimes className="w-3 h-3 text-pink-600" />
                                             </button>
                                         </div>
                                     ))}
                                     <button
                                         onClick={handleResetFilters}
-                                        className="text-sm text-gray-500 hover:text-rose-600 font-medium ml-auto transition-colors"
+                                        className="text-sm text-gray-500 hover:text-pink-600 font-semibold ml-auto transition-colors font-poppins"
                                     >
                                         Reset Semua
                                     </button>
@@ -792,45 +787,45 @@ export default function Catalog() {
                         </div>
                     )}
 
-                    {/* Loading State */}
+                    {/* ==================== LOADING STATE ==================== */}
                     {loading && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-12">
                             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                                 <div
                                     key={i}
-                                    className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-pulse"
+                                    className="bg-white rounded-3xl border border-gray-100 overflow-hidden"
                                 >
-                                    <div className="aspect-square bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100"></div>
-                                    <div className="p-4 space-y-3">
-                                        <div className="h-4 bg-gray-200 rounded-lg"></div>
-                                        <div className="h-4 bg-gray-200 rounded-lg w-2/3"></div>
-                                        <div className="h-6 bg-gray-200 rounded-lg w-1/2"></div>
+                                    <div className="aspect-square skeleton-shimmer"></div>
+                                    <div className="p-5 space-y-3">
+                                        <div className="h-4 skeleton-shimmer rounded-lg"></div>
+                                        <div className="h-4 skeleton-shimmer rounded-lg w-2/3"></div>
+                                        <div className="h-6 skeleton-shimmer rounded-lg w-1/2"></div>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     )}
 
-                    {/* Error Message */}
+                    {/* ==================== ERROR MESSAGE ==================== */}
                     {error && (
                         <div className="mb-8 animate-scaleIn">
-                            <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-200 p-6">
-                                <div className="flex items-start space-x-4">
-                                    <div className="flex-shrink-0 w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-                                        <span className="text-2xl">⚠️</span>
+                            <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-3xl border-2 border-amber-200 p-6">
+                                <div className="flex items-start gap-4">
+                                    <div className="flex-shrink-0 w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center">
+                                        <span className="text-3xl">⚠️</span>
                                     </div>
                                     <div className="flex-1">
-                                        <h4 className="text-base font-semibold text-amber-900 mb-1">
+                                        <h4 className="text-lg font-bold text-amber-900 mb-2 font-playfair">
                                             Mode Demo Aktif
                                         </h4>
-                                        <p className="text-sm text-amber-700 mb-3">
+                                        <p className="text-sm text-amber-700 mb-4 leading-relaxed font-poppins">
                                             Menampilkan data contoh karena
                                             server offline. Data yang
                                             ditampilkan adalah simulasi.
                                         </p>
                                         <button
                                             onClick={fetchProducts}
-                                            className="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition-colors"
+                                            className="px-5 py-2.5 bg-amber-600 text-white text-sm font-semibold rounded-xl hover:bg-amber-700 transition-colors shadow-lg font-poppins"
                                         >
                                             Coba Muat Ulang
                                         </button>
@@ -840,21 +835,21 @@ export default function Catalog() {
                         </div>
                     )}
 
-                    {/* Products Grid */}
+                    {/* ==================== PRODUCTS GRID ==================== */}
                     {!loading && (
                         <>
                             {filteredProducts.length > 0 ? (
                                 <div
                                     className={`grid gap-1 mb-12 ${
                                         viewMode === "grid"
-                                            ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5"
+                                            ? "grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5"
                                             : "grid-cols-1"
                                     }`}
                                 >
                                     {filteredProducts.map((product, index) => (
                                         <div
                                             key={product.id}
-                                            className={`animate-scaleIn stagger-${(index % 8) + 1}`}
+                                            className={`animate-scaleIn delay-${(index % 8) * 100}`}
                                         >
                                             <ProductCard
                                                 product={product}
@@ -864,23 +859,23 @@ export default function Catalog() {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="text-center py-16 animate-fadeInUp">
-                                    <div className="w-24 h-24 mx-auto bg-gradient-to-br from-rose-100 to-pink-100 rounded-full flex items-center justify-center mb-6">
-                                        <FaSearch className="h-10 w-10 text-rose-400" />
+                                <div className="text-center py-20 animate-fadeInUp">
+                                    <div className="w-28 h-28 mx-auto bg-gradient-to-br from-pink-100 to-rose-100 rounded-full flex items-center justify-center mb-6">
+                                        <FaSearch className="h-12 w-12 text-pink-500" />
                                     </div>
-                                    <h3 className="catalog-heading text-2xl font-semibold text-gray-900 mb-3">
+                                    <h3 className="font-playfair text-3xl font-bold text-gray-900 mb-3">
                                         Produk Tidak Ditemukan
                                     </h3>
-                                    <p className="text-gray-500 mb-8 max-w-md mx-auto">
+                                    <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed font-poppins">
                                         Maaf, kami tidak dapat menemukan produk
                                         yang sesuai dengan pencarian Anda. Coba
                                         kata kunci lain atau jelajahi kategori
                                         berbeda.
                                     </p>
-                                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                         <button
                                             onClick={handleResetFilters}
-                                            className="px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:shadow-rose-200 transition-all"
+                                            className="px-8 py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white text-sm font-bold rounded-xl hover:shadow-xl hover:shadow-pink-200 transition-all font-poppins"
                                         >
                                             Reset Semua Filter
                                         </button>
@@ -888,7 +883,7 @@ export default function Catalog() {
                                             onClick={() =>
                                                 setSelectedCategory("all")
                                             }
-                                            className="px-6 py-3 bg-white text-gray-700 border-2 border-gray-200 text-sm font-semibold rounded-xl hover:border-rose-300 hover:bg-rose-50 transition-all"
+                                            className="px-8 py-4 bg-white text-gray-700 border-2 border-gray-200 text-sm font-bold rounded-xl hover:border-pink-300 hover:bg-pink-50 transition-all font-poppins"
                                         >
                                             Lihat Semua Produk
                                         </button>
@@ -898,105 +893,50 @@ export default function Catalog() {
                         </>
                     )}
 
-                    {/* Benefits Section */}
-                    <div className="mt-16 mb-12">
-                        <div className="grid md:grid-cols-3 gap-6">
-                            <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition-all hover:-translate-y-1">
-                                <div className="w-14 h-14 bg-gradient-to-br from-rose-100 to-pink-100 rounded-2xl flex items-center justify-center mb-4">
-                                    <FaLeaf className="w-7 h-7 text-rose-600" />
-                                </div>
-                                <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                                    100% Bunga Segar
-                                </h4>
-                                <p className="text-gray-600 text-sm leading-relaxed">
-                                    Setiap bucket dipilih dengan teliti
-                                    menggunakan bunga segar berkualitas premium
-                                    langsung dari kebun.
+                    {/* ==================== CTA SECTION ==================== */}
+                    <div className="mt-16 mb-20">
+                        <div className="relative bg-gradient-to-br from-pink-600 via-rose-600 to-pink-700 rounded-3xl overflow-hidden shadow-2xl">
+                            {/* Decorative Elements */}
+                            <div className="absolute inset-0 bg-noise"></div>
+                            <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+                            <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+
+                            <div className="relative p-10 md:p-16 text-center">
+                                <h3 className="font-playfair text-4xl md:text-5xl font-bold text-white mb-4">
+                                    Butuh Rekomendasi?
+                                </h3>
+                                <p className="text-white/90 text-lg md:text-xl mb-10 max-w-2xl mx-auto font-poppins leading-relaxed">
+                                    Tim kami siap membantu Anda memilih bucket
+                                    bunga yang sempurna untuk momen spesial Anda
                                 </p>
-                            </div>
-
-                            <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition-all hover:-translate-y-1">
-                                <div className="w-14 h-14 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mb-4">
-                                    <FaShoppingBag className="w-7 h-7 text-amber-600" />
-                                </div>
-                                <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                                    Pengiriman Aman
-                                </h4>
-                                <p className="text-gray-600 text-sm leading-relaxed">
-                                    Packing rapi dan aman memastikan bucket
-                                    bunga tiba dalam kondisi sempurna di tangan
-                                    Anda.
-                                </p>
-                            </div>
-
-                            <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition-all hover:-translate-y-1">
-                                <div className="w-14 h-14 bg-gradient-to-br from-violet-100 to-purple-100 rounded-2xl flex items-center justify-center mb-4">
-                                    <FaTag className="w-7 h-7 text-violet-600" />
-                                </div>
-                                <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                                    Kartu Ucapan Gratis
-                                </h4>
-                                <p className="text-gray-600 text-sm leading-relaxed">
-                                    Tambahkan sentuhan personal dengan kartu
-                                    ucapan gratis untuk setiap pemesanan bucket
-                                    bunga.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Call to Action */}
-                    <div className="mt-12 mb-16">
-                        <div className="bg-gradient-to-br from-rose-600 via-pink-500 to-rose-500 rounded-3xl overflow-hidden shadow-2xl">
-                            <div className="relative p-8 md:p-12">
-                                {/* Decorative Elements */}
-                                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-                                <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-
-                                <div className="relative text-center">
-                                    <h3 className="catalog-heading text-3xl md:text-4xl font-bold text-white mb-4">
-                                        Butuh Rekomendasi Khusus?
-                                    </h3>
-                                    <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
-                                        Tim kami siap membantu Anda memilih
-                                        bucket bunga yang sempurna untuk momen
-                                        spesial Anda
-                                    </p>
-                                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                        <a
-                                            href="https://wa.me/YOUR_NUMBER"
-                                            className="inline-flex items-center justify-center px-8 py-4 bg-white text-rose-600 text-base font-semibold rounded-xl hover:shadow-xl transition-all hover:scale-105"
-                                        >
-                                            <svg
-                                                className="w-5 h-5 mr-2"
-                                                fill="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-                                            </svg>
-                                            Hubungi via WhatsApp
-                                        </a>
-                                        <button className="inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur-sm text-white text-base font-semibold rounded-xl border-2 border-white/30 hover:bg-white/20 transition-all">
-                                            Lihat Katalog Lengkap
-                                        </button>
-                                    </div>
+                                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                    <a
+                                        href="https://wa.me/6282371663414"
+                                        className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-pink-600 text-base font-bold rounded-xl hover:shadow-2xl transition-all hover:scale-105 font-poppins"
+                                    >
+                                        <FaWhatsapp className="w-5 h-5" />
+                                        <span>Hubungi via WhatsApp</span>
+                                    </a>
+                                    <button className="inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur-sm text-white text-base font-bold rounded-xl border-2 border-white/30 hover:bg-white/20 transition-all font-poppins">
+                                        Lihat Katalog Lengkap
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Mobile Filter Modal */}
+                {/* ==================== MOBILE FILTER MODAL ==================== */}
                 {showMobileFilters && (
                     <div className="fixed inset-0 z-50 lg:hidden">
                         <div
-                            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
                             onClick={() => setShowMobileFilters(false)}
                         />
-                        <div className="fixed bottom-0 inset-x-0 bg-white rounded-t-3xl max-h-[80vh] overflow-y-auto">
-                            <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 rounded-t-3xl">
+                        <div className="fixed bottom-0 inset-x-0 bg-white rounded-t-3xl max-h-[85vh] overflow-y-auto">
+                            <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-5 rounded-t-3xl z-10">
                                 <div className="flex items-center justify-between">
-                                    <h3 className="text-lg font-semibold text-gray-900">
+                                    <h3 className="text-xl font-bold text-gray-900 font-playfair">
                                         Filter & Urutkan
                                     </h3>
                                     <button
@@ -1010,9 +950,9 @@ export default function Catalog() {
                                 </div>
                             </div>
 
-                            <div className="p-6 space-y-6">
+                            <div className="p-6 space-y-8">
                                 <div>
-                                    <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                                    <h4 className="text-sm font-bold text-gray-900 mb-4 font-poppins">
                                         Urutkan Berdasarkan
                                     </h4>
                                     <div className="grid grid-cols-2 gap-3">
@@ -1023,20 +963,21 @@ export default function Catalog() {
                                                     setSortBy(option.value);
                                                     setShowMobileFilters(false);
                                                 }}
-                                                className={`p-3 rounded-xl text-sm font-medium transition-all ${
+                                                className={`p-4 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 font-poppins ${
                                                     sortBy === option.value
-                                                        ? "bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md"
+                                                        ? "bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg"
                                                         : "bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200"
                                                 }`}
                                             >
-                                                {option.label}
+                                                <span>{option.icon}</span>
+                                                <span>{option.label}</span>
                                             </button>
                                         ))}
                                     </div>
                                 </div>
 
                                 <div>
-                                    <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                                    <h4 className="text-sm font-bold text-gray-900 mb-4 font-poppins">
                                         Pilih Kategori
                                     </h4>
                                     <div className="grid grid-cols-3 gap-3">
@@ -1045,14 +986,14 @@ export default function Catalog() {
                                                 setSelectedCategory("all");
                                                 setShowMobileFilters(false);
                                             }}
-                                            className={`p-3 rounded-xl flex flex-col items-center justify-center space-y-2 ${
+                                            className={`p-4 rounded-xl flex flex-col items-center justify-center gap-2 ${
                                                 selectedCategory === "all"
-                                                    ? "bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md"
+                                                    ? "bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg"
                                                     : "bg-gray-50 border border-gray-200 hover:bg-gray-100"
                                             }`}
                                         >
-                                            <span className="text-xl">🌸</span>
-                                            <span className="text-xs font-medium">
+                                            <span className="text-2xl">🌸</span>
+                                            <span className="text-xs font-bold font-poppins">
                                                 Semua
                                             </span>
                                         </button>
@@ -1065,18 +1006,18 @@ export default function Catalog() {
                                                     );
                                                     setShowMobileFilters(false);
                                                 }}
-                                                className={`p-3 rounded-xl flex flex-col items-center justify-center space-y-2 ${
+                                                className={`p-4 rounded-xl flex flex-col items-center justify-center gap-2 ${
                                                     selectedCategory ===
                                                     category
-                                                        ? `${categoryColors[category]} border shadow-md`
+                                                        ? `bg-gradient-to-r ${categoryColors[category]} text-white shadow-lg`
                                                         : "bg-gray-50 border border-gray-200 hover:bg-gray-100"
                                                 }`}
                                             >
-                                                <span className="text-xl">
+                                                <span className="text-2xl">
                                                     {categoryIcons[category] ||
                                                         "🌸"}
                                                 </span>
-                                                <span className="text-xs text-gray-700 font-medium">
+                                                <span className="text-xs font-bold text-gray-700 font-poppins">
                                                     {categoryLabels[category] ||
                                                         category}
                                                 </span>
@@ -1089,13 +1030,13 @@ export default function Catalog() {
                             <div className="sticky bottom-0 bg-white border-t border-gray-100 p-6 space-y-3">
                                 <button
                                     onClick={handleResetFilters}
-                                    className="w-full py-3 text-gray-700 border-2 border-gray-300 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors"
+                                    className="w-full py-4 text-gray-700 border-2 border-gray-300 rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors font-poppins"
                                 >
                                     Reset Semua Filter
                                 </button>
                                 <button
                                     onClick={() => setShowMobileFilters(false)}
-                                    className="w-full py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-xl text-sm font-semibold shadow-lg hover:shadow-xl transition-all"
+                                    className="w-full py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-xl text-sm font-bold shadow-lg hover:shadow-xl transition-all font-poppins"
                                 >
                                     Terapkan Filter ({filteredProducts.length}{" "}
                                     Produk)

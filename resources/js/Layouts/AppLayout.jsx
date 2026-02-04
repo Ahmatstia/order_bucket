@@ -1,51 +1,152 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "@inertiajs/react";
 import CustomerGreeting from "../Components/CustomerGreeting";
 import CartIcon from "../Components/CartIcon";
+import {
+    FaInstagram,
+    FaFacebookF,
+    FaWhatsapp,
+    FaEnvelope,
+    FaMapMarkerAlt,
+    FaPhone,
+    FaHeart,
+    FaShieldAlt,
+    FaTruck,
+} from "react-icons/fa";
 
 export default function AppLayout({ children }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    // Handle scroll effect for header
+    useEffect(() => {
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 20);
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
+    // Lock body scroll when mobile menu is open
+    useEffect(() => {
+        if (isMobileMenuOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "unset";
+        }
+
+        return () => {
+            document.body.style.overflow = "unset";
+        };
+    }, [isMobileMenuOpen]);
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Header */}
+        <div className="min-h-screen bg-white">
+            <style>{`
+                @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap");
+
+                .font-playfair {
+                    font-family: "Playfair Display", serif;
+                }
+
+                .font-poppins {
+                    font-family: "Poppins", sans-serif;
+                }
+
+                @keyframes slideDown {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                .animate-slide-down {
+                    animation: slideDown 0.3s ease-out forwards;
+                }
+
+                .nav-link {
+                    position: relative;
+                    transition: color 0.3s ease;
+                }
+
+                .nav-link::after {
+                    content: "";
+                    position: absolute;
+                    bottom: -4px;
+                    left: 0;
+                    width: 0;
+                    height: 2px;
+                    background: linear-gradient(90deg, #ec4899, #f43f5e);
+                    transition: width 0.3s ease;
+                }
+
+                .nav-link:hover::after {
+                    width: 100%;
+                }
+
+                .mobile-menu-backdrop {
+                    backdrop-filter: blur(8px);
+                    -webkit-backdrop-filter: blur(8px);
+                }
+            `}</style>
+
+            {/* ==================== HEADER ==================== */}
             <header
                 id="main-header"
-                className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-100"
+                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+                    isScrolled
+                        ? "bg-white/95 backdrop-blur-lg shadow-lg border-b border-pink-100"
+                        : "bg-gradient-to-r from-white/70 via-pink-50/40 to-white/70 backdrop-blur-md border-b border-white/30"
+                }`}
             >
                 <div className="container mx-auto px-4 sm:px-6">
-                    <div className="flex justify-between items-center py-4">
-                        <div className="flex items-center space-x-3">
+                    <div className="flex justify-between items-center py-3 md:py-4">
+                        {/* Logo & Brand */}
+                        <div className="flex items-center space-x-3 md:space-x-4">
                             <Link
                                 href="/"
-                                className="flex items-center space-x-2"
+                                className="flex items-center space-x-2 md:space-x-3 group"
                             >
-                                <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-rose-500 rounded-lg flex items-center justify-center">
-                                    <span className="text-white font-bold text-xl">
-                                        B
-                                    </span>
+                                {/* Logo */}
+                                <div className="relative">
+                                    <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-pink-500 via-rose-500 to-pink-600 rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-pink-500/50 transition-all duration-300 group-hover:scale-105">
+                                        <span className="text-white font-bold text-xl md:text-2xl font-playfair">
+                                            B
+                                        </span>
+                                    </div>
+                                    {/* Decorative dot */}
+                                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full border-2 border-white"></div>
                                 </div>
+
+                                {/* Brand Name */}
                                 <div className="hidden sm:block">
-                                    <h1 className="text-xl font-bold text-gray-900">
+                                    <h1 className="text-xl md:text-2xl font-bold font-playfair bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
                                         BucketBouquets
                                     </h1>
-                                    <p className="text-xs text-gray-500">
-                                        Bucket bunga spesialmu
+                                    <p className="text-xs text-gray-500 font-poppins">
+                                        Bucket bunga spesialmu ✨
                                     </p>
                                 </div>
                             </Link>
-                            <div className="hidden sm:block">
+
+                            {/* Customer Greeting - Desktop Only */}
+                            <div className="hidden lg:block ml-4">
                                 <CustomerGreeting />
                             </div>
                         </div>
 
                         {/* Desktop Navigation */}
-                        <nav className="hidden md:flex items-center space-x-6">
-                            <ul className="flex space-x-6">
+                        <nav className="hidden md:flex items-center space-x-8">
+                            <ul className="flex items-center space-x-8">
                                 <li>
                                     <Link
                                         href="/"
-                                        className="text-gray-700 hover:text-pink-600 font-medium transition-colors"
+                                        className="nav-link text-gray-700 hover:text-pink-600 font-medium font-poppins transition-colors"
                                     >
                                         Home
                                     </Link>
@@ -53,48 +154,56 @@ export default function AppLayout({ children }) {
                                 <li>
                                     <Link
                                         href="/catalog"
-                                        className="text-gray-700 hover:text-pink-600 font-medium transition-colors"
+                                        className="nav-link text-gray-700 hover:text-pink-600 font-medium font-poppins transition-colors"
                                     >
                                         Katalog
                                     </Link>
                                 </li>
                                 <li>
                                     <a
-                                        href="#"
-                                        className="text-gray-700 hover:text-pink-600 font-medium transition-colors"
+                                        href="#tentang"
+                                        className="nav-link text-gray-700 hover:text-pink-600 font-medium font-poppins transition-colors"
                                     >
                                         Tentang
                                     </a>
                                 </li>
                                 <li>
                                     <a
-                                        href="#"
-                                        className="text-gray-700 hover:text-pink-600 font-medium transition-colors"
+                                        href="#kontak"
+                                        className="nav-link text-gray-700 hover:text-pink-600 font-medium font-poppins transition-colors"
                                     >
                                         Kontak
                                     </a>
                                 </li>
                             </ul>
 
-                            {/* Cart Icon for Desktop */}
-                            <div className="ml-4">
+                            {/* Cart Icon + CTA */}
+                            <div className="flex items-center space-x-4">
                                 <CartIcon />
+                                <a
+                                    href="https://wa.me/6282371663414"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hidden lg:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-full hover:from-pink-700 hover:to-rose-700 transition-all duration-300 shadow-md hover:shadow-lg font-medium font-poppins text-sm group"
+                                >
+                                    <FaWhatsapp className="w-4 h-4" />
+                                    <span>Chat Now</span>
+                                </a>
                             </div>
                         </nav>
 
-                        {/* Mobile: Cart Icon + Menu Button */}
-                        <div className="flex items-center gap-2 md:hidden">
+                        {/* ================= MOBILE ================= */}
+                        <div className="flex items-center gap-3 md:hidden">
                             <CartIcon />
                             <button
                                 onClick={() =>
                                     setIsMobileMenuOpen(!isMobileMenuOpen)
                                 }
-                                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                                aria-label="Toggle menu"
+                                className="p-2 rounded-lg hover:bg-pink-50 transition-colors"
                             >
                                 {isMobileMenuOpen ? (
                                     <svg
-                                        className="w-6 h-6 text-gray-700"
+                                        className="w-6 h-6 text-pink-600"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -108,7 +217,7 @@ export default function AppLayout({ children }) {
                                     </svg>
                                 ) : (
                                     <svg
-                                        className="w-6 h-6 text-gray-700"
+                                        className="w-6 h-6 text-pink-800"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -124,175 +233,274 @@ export default function AppLayout({ children }) {
                             </button>
                         </div>
                     </div>
+                </div>
 
-                    {/* Mobile Menu */}
-                    {isMobileMenuOpen && (
-                        <div className="md:hidden py-4 border-t border-gray-200 bg-white">
-                            <div className="flex flex-col space-y-3">
-                                <Link
-                                    href="/"
-                                    className="px-3 py-2 rounded-lg hover:bg-pink-50 font-medium text-gray-700 transition-colors"
+                {/* ================= MOBILE MENU ================= */}
+                {isMobileMenuOpen && (
+                    <>
+                        <div
+                            className="fixed inset-0 bg-black/40 z-[60]"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                        />
+                        <div className="absolute top-full left-0 right-0 bg-white shadow-2xl z-[70] animate-slide-down">
+                            <div className="container mx-auto px-4 py-6 space-y-3">
+                                {[
+                                    { label: "🏠 Home", href: "/" },
+                                    { label: "🌸 Katalog", href: "/catalog" },
+                                    { label: "ℹ️ Tentang", href: "#tentang" },
+                                    { label: "📞 Kontak", href: "#kontak" },
+                                ].map((item) => (
+                                    <Link
+                                        key={item.label}
+                                        href={item.href}
+                                        onClick={() =>
+                                            setIsMobileMenuOpen(false)
+                                        }
+                                        className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 font-medium text-gray-700 hover:text-pink-600 transition-all font-poppins"
+                                    >
+                                        {item.label}
+                                    </Link>
+                                ))}
+
+                                <a
+                                    href="https://wa.me/6282371663414"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-center gap-2 w-full mt-4 px-6 py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-full shadow-lg font-semibold font-poppins"
                                     onClick={() => setIsMobileMenuOpen(false)}
                                 >
-                                    Home
-                                </Link>
-                                <Link
-                                    href="/catalog"
-                                    className="px-3 py-2 rounded-lg hover:bg-pink-50 font-medium text-gray-700 transition-colors"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                >
-                                    Katalog
-                                </Link>
-                                <a
-                                    href="#"
-                                    className="px-3 py-2 rounded-lg hover:bg-pink-50 font-medium text-gray-700 transition-colors"
-                                >
-                                    Tentang
+                                    <FaWhatsapp className="w-5 h-5" />
+                                    Chat via WhatsApp
                                 </a>
-                                <a
-                                    href="#"
-                                    className="px-3 py-2 rounded-lg hover:bg-pink-50 font-medium text-gray-700 transition-colors"
-                                >
-                                    Kontak
-                                </a>
-                                <div className="pt-3 border-t border-gray-100">
-                                    <CustomerGreeting />
-                                </div>
                             </div>
                         </div>
-                    )}
-                </div>
+                    </>
+                )}
             </header>
 
-            {/* Children can decide their own width */}
-            <main>{children}</main>
+            {/* Main Content with proper spacing for fixed header */}
+            <main className="pt-[73px] md:pt-[81px]">{children}</main>
 
-            {/* Footer */}
-            <footer className="bg-gray-900 text-white mt-auto">
-                <div className="container mx-auto px-4 sm:px-6 py-8 md:py-12">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12">
-                        <div className="md:col-span-2">
-                            <div className="flex items-center space-x-2 mb-4">
-                                <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 rounded-lg flex items-center justify-center">
-                                    <span className="text-white font-bold">
+            {/* ==================== FOOTER ==================== */}
+            <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white relative overflow-hidden">
+                {/* Background Decorations */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-pink-500/5 rounded-full filter blur-3xl"></div>
+                <div className="absolute bottom-0 left-0 w-96 h-96 bg-rose-500/5 rounded-full filter blur-3xl"></div>
+
+                <div className="container mx-auto px-4 sm:px-6 py-12 md:py-16 relative z-10">
+                    {/* Top Section - Trust Badges */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 pb-12 border-b border-gray-700">
+                        <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl backdrop-blur-sm border border-white/10">
+                            <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <FaShieldAlt className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <h4 className="font-semibold font-poppins text-white mb-1">
+                                    Garansi Kualitas
+                                </h4>
+                                <p className="text-sm text-gray-400 font-poppins">
+                                    Uang kembali jika tidak puas
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl backdrop-blur-sm border border-white/10">
+                            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <FaTruck className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <h4 className="font-semibold font-poppins text-white mb-1">
+                                    Pengiriman Cepat
+                                </h4>
+                                <p className="text-sm text-gray-400 font-poppins">
+                                    Same day delivery tersedia
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl backdrop-blur-sm border border-white/10">
+                            <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <FaHeart className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <h4 className="font-semibold font-poppins text-white mb-1">
+                                    Dibuat dengan Cinta
+                                </h4>
+                                <p className="text-sm text-gray-400 font-poppins">
+                                    Dirangkai penuh kehati-hatian
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Main Footer Content */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-12">
+                        {/* Brand Column */}
+                        <div className="lg:col-span-2">
+                            <div className="flex items-center space-x-3 mb-6">
+                                <div className="w-12 h-12 bg-gradient-to-br from-pink-500 via-rose-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg">
+                                    <span className="text-white font-bold text-2xl font-playfair">
                                         B
                                     </span>
                                 </div>
-                                <h3 className="text-xl font-bold">
-                                    BucketBouquets
-                                </h3>
+                                <div>
+                                    <h3 className="text-2xl font-bold font-playfair bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
+                                        BucketBouquets
+                                    </h3>
+                                    <p className="text-xs text-gray-400 font-poppins">
+                                        Premium Flower Arrangements
+                                    </p>
+                                </div>
                             </div>
-                            <p className="text-gray-400 text-sm mb-6 max-w-lg">
-                                Menyediakan bucket bunga berkualitas tinggi
-                                untuk setiap momen spesial. Dari ulang tahun
-                                hingga anniversary, kami hadir dengan rangkaian
-                                bunga terbaik.
+
+                            <p className="text-gray-400 text-sm md:text-base mb-6 max-w-md leading-relaxed font-poppins">
+                                Menyediakan bucket bunga berkualitas premium
+                                untuk setiap momen spesial. Dari ulang tahun,
+                                wisuda, anniversary hingga pernikahan - kami
+                                hadir dengan rangkaian bunga terbaik yang
+                                dirangkai dengan penuh cinta.
                             </p>
-                            <div className="flex space-x-4">
+
+                            {/* Social Media */}
+                            <div className="flex items-center gap-3">
                                 <a
-                                    href="#"
-                                    className="w-10 h-10 bg-gray-800 hover:bg-gray-700 rounded-full flex items-center justify-center transition-colors"
+                                    href="https://instagram.com/bucketbouquets"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group w-11 h-11 bg-gradient-to-br from-pink-500/10 to-rose-500/10 hover:from-pink-500 hover:to-rose-500 border border-pink-500/20 hover:border-pink-500 rounded-xl flex items-center justify-center transition-all duration-300"
                                     aria-label="Instagram"
                                 >
-                                    <span className="text-lg">📷</span>
+                                    <FaInstagram className="w-5 h-5 text-pink-400 group-hover:text-white transition-colors" />
                                 </a>
                                 <a
-                                    href="#"
-                                    className="w-10 h-10 bg-gray-800 hover:bg-gray-700 rounded-full flex items-center justify-center transition-colors"
+                                    href="https://facebook.com/bucketbouquets"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group w-11 h-11 bg-gradient-to-br from-blue-500/10 to-blue-600/10 hover:from-blue-500 hover:to-blue-600 border border-blue-500/20 hover:border-blue-500 rounded-xl flex items-center justify-center transition-all duration-300"
                                     aria-label="Facebook"
                                 >
-                                    <span className="text-lg">📘</span>
+                                    <FaFacebookF className="w-5 h-5 text-blue-400 group-hover:text-white transition-colors" />
                                 </a>
                                 <a
-                                    href="#"
-                                    className="w-10 h-10 bg-gray-800 hover:bg-gray-700 rounded-full flex items-center justify-center transition-colors"
+                                    href="https://wa.me/6282371663414"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group w-11 h-11 bg-gradient-to-br from-green-500/10 to-emerald-500/10 hover:from-green-500 hover:to-emerald-500 border border-green-500/20 hover:border-green-500 rounded-xl flex items-center justify-center transition-all duration-300"
                                     aria-label="WhatsApp"
                                 >
-                                    <span className="text-lg">💬</span>
+                                    <FaWhatsapp className="w-5 h-5 text-green-400 group-hover:text-white transition-colors" />
                                 </a>
                             </div>
                         </div>
 
+                        {/* Quick Links Column */}
                         <div>
-                            <h4 className="font-bold text-lg mb-4">Menu</h4>
+                            <h4 className="font-bold text-lg mb-6 font-playfair relative inline-block">
+                                Menu Cepat
+                                <div className="absolute bottom-0 left-0 w-12 h-0.5 bg-gradient-to-r from-pink-500 to-rose-500"></div>
+                            </h4>
                             <ul className="space-y-3">
                                 <li>
                                     <Link
                                         href="/"
-                                        className="text-gray-400 hover:text-white transition-colors text-sm"
+                                        className="text-gray-400 hover:text-pink-400 transition-colors text-sm md:text-base flex items-center gap-2 group font-poppins"
                                     >
+                                        <span className="w-1.5 h-1.5 bg-pink-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
                                         Home
                                     </Link>
                                 </li>
                                 <li>
                                     <Link
                                         href="/catalog"
-                                        className="text-gray-400 hover:text-white transition-colors text-sm"
+                                        className="text-gray-400 hover:text-pink-400 transition-colors text-sm md:text-base flex items-center gap-2 group font-poppins"
                                     >
+                                        <span className="w-1.5 h-1.5 bg-pink-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
                                         Katalog Produk
                                     </Link>
                                 </li>
                                 <li>
                                     <Link
                                         href="/cart"
-                                        className="text-gray-400 hover:text-white transition-colors text-sm"
+                                        className="text-gray-400 hover:text-pink-400 transition-colors text-sm md:text-base flex items-center gap-2 group font-poppins"
                                     >
+                                        <span className="w-1.5 h-1.5 bg-pink-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
                                         Keranjang
                                     </Link>
                                 </li>
                                 <li>
                                     <a
                                         href="#"
-                                        className="text-gray-400 hover:text-white transition-colors text-sm"
+                                        className="text-gray-400 hover:text-pink-400 transition-colors text-sm md:text-base flex items-center gap-2 group font-poppins"
                                     >
+                                        <span className="w-1.5 h-1.5 bg-pink-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
                                         Cara Order
                                     </a>
                                 </li>
                                 <li>
                                     <a
                                         href="#"
-                                        className="text-gray-400 hover:text-white transition-colors text-sm"
+                                        className="text-gray-400 hover:text-pink-400 transition-colors text-sm md:text-base flex items-center gap-2 group font-poppins"
                                     >
+                                        <span className="w-1.5 h-1.5 bg-pink-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
                                         FAQ
                                     </a>
                                 </li>
                             </ul>
                         </div>
 
+                        {/* Contact Column */}
                         <div>
-                            <h4 className="font-bold text-lg mb-4">Kontak</h4>
-                            <div className="space-y-3 text-sm text-gray-400">
-                                <div className="flex items-start gap-3">
-                                    <span className="text-lg mt-0.5">📱</span>
+                            <h4 className="font-bold text-lg mb-6 font-playfair relative inline-block">
+                                Hubungi Kami
+                                <div className="absolute bottom-0 left-0 w-12 h-0.5 bg-gradient-to-r from-pink-500 to-rose-500"></div>
+                            </h4>
+                            <div className="space-y-4 text-sm md:text-base">
+                                <div className="flex items-start gap-3 group">
+                                    <div className="w-10 h-10 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:from-green-500/20 group-hover:to-emerald-500/20 transition-all">
+                                        <FaPhone className="w-4 h-4 text-green-400" />
+                                    </div>
                                     <div>
                                         <a
-                                            href="https://wa.me/6281234567890"
+                                            href="https://wa.me/6282371663414"
                                             target="_blank"
-                                            className="hover:text-green-400 transition-colors block"
+                                            className="text-gray-300 hover:text-green-400 transition-colors block font-medium font-poppins"
                                             rel="noopener noreferrer"
                                         >
-                                            0812-3456-7890
+                                            0823-7166-3414
                                         </a>
-                                        <span className="text-xs text-gray-500">
-                                            (WhatsApp)
+                                        <span className="text-xs text-gray-500 font-poppins">
+                                            WhatsApp (24/7)
                                         </span>
                                     </div>
                                 </div>
-                                <div className="flex items-start gap-3">
-                                    <span className="text-lg mt-0.5">✉️</span>
+
+                                <div className="flex items-start gap-3 group">
+                                    <div className="w-10 h-10 bg-gradient-to-br from-pink-500/10 to-rose-500/10 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:from-pink-500/20 group-hover:to-rose-500/20 transition-all">
+                                        <FaEnvelope className="w-4 h-4 text-pink-400" />
+                                    </div>
                                     <div>
-                                        <span>order@bucketbouquets.id</span>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            Response cepat via email
+                                        <a
+                                            href="mailto:order@bucketbouquets.id"
+                                            className="text-gray-300 hover:text-pink-400 transition-colors font-poppins"
+                                        >
+                                            order@bucketbouquets.id
+                                        </a>
+                                        <p className="text-xs text-gray-500 mt-1 font-poppins">
+                                            Response dalam 1 jam
                                         </p>
                                     </div>
                                 </div>
-                                <div className="flex items-start gap-3">
-                                    <span className="text-lg mt-0.5">📍</span>
+
+                                <div className="flex items-start gap-3 group">
+                                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:from-blue-500/20 group-hover:to-cyan-500/20 transition-all">
+                                        <FaMapMarkerAlt className="w-4 h-4 text-blue-400" />
+                                    </div>
                                     <div>
-                                        <span>Jakarta Selatan</span>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            Pengiriman seluruh Jabodetabek
+                                        <span className="text-gray-300 font-poppins">
+                                            Pariaman, Sumatera Barat
+                                        </span>
+                                        <p className="text-xs text-gray-500 mt-1 font-poppins">
+                                            Pengiriman se-Indonesia
                                         </p>
                                     </div>
                                 </div>
@@ -300,32 +508,65 @@ export default function AppLayout({ children }) {
                         </div>
                     </div>
 
-                    <div className="border-t border-gray-800 mt-8 pt-8 text-center">
-                        <p className="text-gray-500 text-sm mb-2">
-                            © {new Date().getFullYear()} BucketBouquets. All
-                            rights reserved.
-                        </p>
-                        <div className="flex flex-wrap justify-center gap-4 text-xs text-gray-500">
-                            <a
-                                href="#"
-                                className="hover:text-white transition-colors"
-                            >
-                                Privacy Policy
-                            </a>
-                            <span>•</span>
-                            <a
-                                href="#"
-                                className="hover:text-white transition-colors"
-                            >
-                                Terms of Service
-                            </a>
-                            <span>•</span>
-                            <a
-                                href="#"
-                                className="hover:text-white transition-colors"
-                            >
-                                Refund Policy
-                            </a>
+                    {/* Bottom Section */}
+                    <div className="border-t border-gray-700 pt-8">
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                            {/* Copyright */}
+                            <p className="text-gray-400 text-sm font-poppins text-center md:text-left">
+                                © {new Date().getFullYear()}{" "}
+                                <span className="font-semibold text-pink-400">
+                                    BucketBouquets
+                                </span>
+                                . Crafted with{" "}
+                                <FaHeart className="inline w-3 h-3 text-rose-500 mx-1" />{" "}
+                                for you.
+                            </p>
+
+                            {/* Legal Links */}
+                            <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-xs md:text-sm text-gray-400 font-poppins">
+                                <a
+                                    href="#"
+                                    className="hover:text-pink-400 transition-colors"
+                                >
+                                    Privacy Policy
+                                </a>
+                                <span className="text-gray-600">•</span>
+                                <a
+                                    href="#"
+                                    className="hover:text-pink-400 transition-colors"
+                                >
+                                    Terms of Service
+                                </a>
+                                <span className="text-gray-600">•</span>
+                                <a
+                                    href="#"
+                                    className="hover:text-pink-400 transition-colors"
+                                >
+                                    Refund Policy
+                                </a>
+                            </div>
+                        </div>
+
+                        {/* Payment & Security Badges */}
+                        <div className="mt-6 pt-6 border-t border-gray-800">
+                            <div className="flex flex-wrap items-center justify-center gap-6">
+                                <div className="text-xs text-gray-500 font-poppins">
+                                    Metode Pembayaran:
+                                </div>
+                                <div className="flex gap-3">
+                                    {["💳", "🏦", "📱"].map((icon, i) => (
+                                        <div
+                                            key={i}
+                                            className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center text-lg border border-white/10"
+                                        >
+                                            {icon}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="text-xs text-gray-500 font-poppins">
+                                    🔒 Transaksi Aman & Terpercaya
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

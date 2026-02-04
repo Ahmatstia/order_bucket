@@ -466,139 +466,80 @@ export default function Home() {
             {/* ==================== HERO SECTION - ENHANCED ==================== */}
             <section
                 className="relative w-full overflow-hidden"
-                style={{ marginTop: "-10rem", paddingTop: "10rem" }}
+                style={{ marginTop: "-11rem", paddingTop: "10rem" }}
             >
-                {/* Hero Image with Overlay */}
                 <div className="relative w-full min-h-screen">
-                    {/* Image Container */}
+                    {/* Background Image */}
                     <div
-                        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                        className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
                         style={{
-                            backgroundImage: "url(/storage/banners/hero1.png)",
+                            backgroundImage: "url(/storage/banners/logo.png)",
                         }}
                     />
 
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-white"></div>
+                    {/* Soft Floral Overlay */}
+                    <div
+                        className="absolute inset-0 bg-gradient-to-r 
+            from-white/75 via-pink-100/50 to-transparent"
+                    ></div>
 
-                    {/* Noise Texture */}
-                    <div className="absolute inset-0 bg-noise opacity-20"></div>
+                    {/* Extra Glow Layer */}
+                    <div
+                        className="absolute inset-0 bg-gradient-to-t 
+            from-white via-transparent to-transparent"
+                    ></div>
 
-                    {/* Content Overlay */}
-                    <div className="relative z-10 container mx-auto px-4 h-screen flex items-center">
-                        <div className="max-w-3xl opacity-0 animate-slide-up">
-                            {/* Badge */}
-                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full text-sm font-medium text-pink-700 mb-6 shadow-lg delay-100">
-                                <span className="w-2 h-2 bg-pink-500 rounded-full animate-pulse"></span>
-                                Trusted by 5,000+ Happy Customers
-                            </div>
-
-                            {/* Main Heading */}
-                            <h1 className="font-playfair text-5xl md:text-7xl font-bold text-white mb-6 leading-tight delay-200">
+                    {/* Content */}
+                    <div className="relative z-10 container mx-auto px-6 h-screen flex items-center">
+                        <div className="max-w-3xl animate-slide-up">
+                            <h1 className="font-playfair text-5xl md:text-6xl font-bold text-pink-800 mb-6 leading-tight">
                                 Sentuhan Cinta dalam
-                                <span className="block text-gradient mt-2">
+                                <span className="block text-rose-600 mt-2">
                                     Setiap Kelopak
                                 </span>
                             </h1>
 
-                            {/* Subheading */}
-                            <p className="font-poppins text-xl md:text-2xl text-white/90 mb-8 leading-relaxed delay-300">
+                            <p className="font-poppins text-lg md:text-xl text-gray-700 mb-8 leading-relaxed">
                                 Wujudkan momen spesial dengan bucket bunga
                                 premium yang dirangkai dengan penuh kasih sayang
                             </p>
 
-                            {/* CTA Buttons */}
-                            <div className="flex flex-col sm:flex-row gap-4 delay-400">
+                            <div className="flex flex-col sm:flex-row gap-4">
                                 <button
                                     onClick={handleWhatsAppClick}
-                                    className="group px-8 py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-full hover:from-pink-700 hover:to-rose-700 transition-all duration-300 shadow-2xl hover:shadow-pink-500/50 flex items-center justify-center gap-3 font-semibold text-lg hover-lift"
+                                    className="group px-8 py-4 
+                        bg-gradient-to-r from-pink-500 to-rose-500 
+                        text-white rounded-full 
+                        hover:from-pink-600 hover:to-rose-600 
+                        transition-all duration-300 
+                        shadow-xl hover:shadow-pink-400/50
+                        flex items-center justify-center gap-3
+                        font-semibold text-lg"
                                 >
                                     <FaWhatsapp className="w-6 h-6" />
-                                    <span>Pesan Sekarang</span>
+                                    Pesan Sekarang
                                     <FaChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                 </button>
 
                                 <Link
                                     href="/catalog"
-                                    className="px-8 py-4 bg-white/90 backdrop-blur-sm text-pink-700 rounded-full hover:bg-white transition-all duration-300 shadow-xl font-semibold text-lg text-center hover-lift"
+                                    className="px-8 py-4 
+                        bg-white text-pink-600 
+                        rounded-full border border-pink-200
+                        hover:bg-pink-50 
+                        transition-all duration-300 
+                        shadow-lg font-semibold text-lg text-center"
                                 >
                                     Lihat Katalog
                                 </Link>
                             </div>
-
-                            {/* Trust Indicators */}
-                            <div className="flex items-center gap-6 mt-8 delay-500">
-                                <div className="flex items-center gap-2">
-                                    <div className="flex -space-x-2">
-                                        {[1, 2, 3, 4].map((i) => (
-                                            <div
-                                                key={i}
-                                                className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 border-2 border-white flex items-center justify-center text-white font-bold text-sm"
-                                            >
-                                                {String.fromCharCode(64 + i)}
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="text-white text-sm font-medium ml-2">
-                                        <div className="flex items-center gap-1">
-                                            {[...Array(5)].map((_, i) => (
-                                                <FaStar
-                                                    key={i}
-                                                    className="w-3 h-3 text-yellow-400 fill-current"
-                                                />
-                                            ))}
-                                        </div>
-                                        <div className="opacity-90">
-                                            4.9/5 dari 1,200+ review
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
-                    </div>
-
-                    {/* Scroll Indicator */}
-                    <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-                        <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center p-2">
-                            <div className="w-1 h-3 bg-white/70 rounded-full animate-pulse"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ==================== STATS SECTION - NEW ==================== */}
-            <section className="bg-gradient-to-br from-pink-600 via-rose-600 to-pink-700 py-16 relative overflow-hidden">
-                <div className="absolute inset-0 bg-noise"></div>
-                <div className="container mx-auto px-4 relative z-10">
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-                        {stats.map((stat, index) => (
-                            <div
-                                key={index}
-                                className="text-center opacity-0 animate-scale-in"
-                                style={{ animationDelay: `${index * 0.1}s` }}
-                            >
-                                <div
-                                    className="text-5xl mb-3 animate-float"
-                                    style={{
-                                        animationDelay: `${index * 0.2}s`,
-                                    }}
-                                >
-                                    {stat.icon}
-                                </div>
-                                <div className="font-playfair text-4xl md:text-5xl font-bold text-white mb-2">
-                                    {stat.number}
-                                </div>
-                                <div className="font-poppins text-pink-100 text-sm md:text-base">
-                                    {stat.label}
-                                </div>
-                            </div>
-                        ))}
                     </div>
                 </div>
             </section>
 
             {/* ==================== FEATURED PRODUCTS - ENHANCED ==================== */}
-            <section className="bg-gradient-to-b from-white via-pink-50/30 to-white py-20 md:py-28">
+            <section className="bg-gradient-to-b from-white via-pink-50/30 to-white md:py-28">
                 <div className="container mx-auto px-4">
                     <div className="max-w-7xl mx-auto">
                         {/* Section Header */}
@@ -638,7 +579,7 @@ export default function Home() {
                                 ))}
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-1">
                                 {featuredProducts.map((product, index) => (
                                     <div
                                         key={product.id}
@@ -714,128 +655,6 @@ export default function Home() {
                                             </div>
                                         )}
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ==================== BEST SELLER - ENHANCED ==================== */}
-            <section className="bg-gradient-to-b from-pink-50 to-white py-20 md:py-28">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-16">
-                            <div className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-700 rounded-full text-sm font-semibold mb-6 shadow-sm">
-                                <span className="text-xl">⭐</span>
-                                <span className="font-poppins">TERPOPULER</span>
-                            </div>
-                            <h2 className="font-playfair text-4xl md:text-6xl font-bold text-gray-900 mb-4">
-                                Pilihan Favorit
-                            </h2>
-                            <p className="font-poppins text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-                                Produk yang paling banyak dipilih dan dicintai
-                                pelanggan kami
-                            </p>
-                        </div>
-
-                        {loading ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                                {[1, 2, 3, 4].map((i) => (
-                                    <div key={i} className="animate-pulse">
-                                        <div className="bg-gray-200 rounded-2xl aspect-[3/4] mb-4"></div>
-                                        <div className="h-4 bg-gray-200 rounded mb-3"></div>
-                                        <div className="h-6 bg-gray-200 rounded w-1/2"></div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                                {bestSellerProducts.map((product, index) => (
-                                    <div
-                                        key={product.id}
-                                        className="opacity-0 animate-slide-up"
-                                        style={{
-                                            animationDelay: `${index * 0.1}s`,
-                                        }}
-                                    >
-                                        <ProductCard product={product} />
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        <div className="text-center mt-12">
-                            <Link
-                                href="/catalog"
-                                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-full hover:from-pink-700 hover:to-rose-700 transition-all duration-300 font-semibold shadow-xl hover:shadow-pink-500/50 hover-lift group"
-                            >
-                                <span className="font-poppins">
-                                    Lihat Semua Koleksi
-                                </span>
-                                <FaChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ==================== PROCESS STEPS - ENHANCED ==================== */}
-            <section className="bg-white py-20 md:py-28 relative overflow-hidden">
-                {/* Background Decoration */}
-                <div className="absolute top-0 left-0 w-96 h-96 bg-pink-100 rounded-full filter blur-3xl opacity-30"></div>
-                <div className="absolute bottom-0 right-0 w-96 h-96 bg-rose-100 rounded-full filter blur-3xl opacity-30"></div>
-
-                <div className="container mx-auto px-4 relative z-10">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-16">
-                            <h2 className="font-playfair text-4xl md:text-6xl font-bold text-gray-900 mb-4">
-                                Cara Pemesanan
-                            </h2>
-                            <p className="font-poppins text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-                                Proses sederhana untuk mendapatkan bouquet
-                                impian Anda
-                            </p>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                            {processSteps.map((step, index) => (
-                                <div
-                                    key={index}
-                                    className="relative group opacity-0 animate-scale-in"
-                                    style={{
-                                        animationDelay: `${index * 0.15}s`,
-                                    }}
-                                >
-                                    {/* Card */}
-                                    <div className="relative bg-white rounded-3xl p-8 border-2 border-gray-100 hover:border-pink-300 transition-all duration-300 hover-lift h-full">
-                                        {/* Step Number Badge */}
-                                        <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg rotate-12 group-hover:rotate-0 transition-transform">
-                                            {step.step}
-                                        </div>
-
-                                        {/* Icon */}
-                                        <div className="text-6xl mb-6 group-hover:scale-110 transition-transform">
-                                            {step.icon}
-                                        </div>
-
-                                        {/* Title */}
-                                        <h3 className="font-playfair text-2xl font-bold text-gray-900 mb-3">
-                                            {step.title}
-                                        </h3>
-
-                                        {/* Description */}
-                                        <p className="font-poppins text-gray-600 leading-relaxed">
-                                            {step.description}
-                                        </p>
-                                    </div>
-
-                                    {/* Connector Arrow (desktop only) */}
-                                    {index < processSteps.length - 1 && (
-                                        <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-20">
-                                            <FaChevronRight className="w-6 h-6 text-pink-300" />
-                                        </div>
-                                    )}
                                 </div>
                             ))}
                         </div>
@@ -932,59 +751,62 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* ==================== QUALITY PROMISE - ENHANCED ==================== */}
-            <section className="bg-gradient-to-b from-white to-pink-50 py-20 md:py-28">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-6xl mx-auto">
+            {/* ==================== PROCESS STEPS - ENHANCED ==================== */}
+            <section className="bg-white py-20 md:py-28 relative overflow-hidden">
+                {/* Background Decoration */}
+                <div className="absolute top-0 left-0 w-96 h-96 bg-pink-100 rounded-full filter blur-3xl opacity-30"></div>
+                <div className="absolute bottom-0 right-0 w-96 h-96 bg-rose-100 rounded-full filter blur-3xl opacity-30"></div>
+
+                <div className="container mx-auto px-4 relative z-10">
+                    <div className="max-w-7xl mx-auto">
                         <div className="text-center mb-16">
-                            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full mb-6 shadow-xl">
-                                <FaLeaf className="w-10 h-10 text-white" />
-                            </div>
                             <h2 className="font-playfair text-4xl md:text-6xl font-bold text-gray-900 mb-4">
-                                Jaminan Kualitas Premium
+                                Cara Pemesanan
                             </h2>
-                            <p className="font-poppins text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-                                Dipetik dengan penuh hati, dirangkai dengan
-                                keahlian, dikirim dengan cinta
+                            <p className="font-poppins text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+                                Proses sederhana untuk mendapatkan bouquet
+                                impian Anda
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {[
-                                {
-                                    icon: <FaCheck className="w-8 h-8" />,
-                                    title: "Fresh Daily",
-                                    desc: "Bunga segar langsung dari supplier terpercaya",
-                                    color: "from-blue-500 to-cyan-500",
-                                },
-                                {
-                                    icon: <FaTruck className="w-8 h-8" />,
-                                    title: "Same Day Delivery",
-                                    desc: "Pesan sebelum jam 2 siang, terima hari yang sama",
-                                    color: "from-emerald-500 to-green-500",
-                                },
-                                {
-                                    icon: <FaHeart className="w-8 h-8" />,
-                                    title: "Handmade with Love",
-                                    desc: "Dirangkai dengan penuh perhatian dan keahlian",
-                                    color: "from-pink-500 to-rose-500",
-                                },
-                            ].map((item, index) => (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {processSteps.map((step, index) => (
                                 <div
                                     key={index}
-                                    className="group bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover-lift border border-gray-100"
+                                    className="relative group opacity-0 animate-scale-in"
+                                    style={{
+                                        animationDelay: `${index * 0.15}s`,
+                                    }}
                                 >
-                                    <div
-                                        className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br ${item.color} rounded-2xl mb-6 text-white group-hover:scale-110 group-hover:rotate-6 transition-all`}
-                                    >
-                                        {item.icon}
+                                    {/* Card */}
+                                    <div className="relative bg-white rounded-3xl p-8 border-2 border-gray-100 hover:border-pink-300 transition-all duration-300 hover-lift h-full">
+                                        {/* Step Number Badge */}
+                                        <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg rotate-12 group-hover:rotate-0 transition-transform">
+                                            {step.step}
+                                        </div>
+
+                                        {/* Icon */}
+                                        <div className="text-6xl mb-6 group-hover:scale-110 transition-transform">
+                                            {step.icon}
+                                        </div>
+
+                                        {/* Title */}
+                                        <h3 className="font-playfair text-2xl font-bold text-gray-900 mb-3">
+                                            {step.title}
+                                        </h3>
+
+                                        {/* Description */}
+                                        <p className="font-poppins text-gray-600 leading-relaxed">
+                                            {step.description}
+                                        </p>
                                     </div>
-                                    <h3 className="font-playfair text-2xl font-bold text-gray-900 mb-3">
-                                        {item.title}
-                                    </h3>
-                                    <p className="font-poppins text-gray-600 leading-relaxed">
-                                        {item.desc}
-                                    </p>
+
+                                    {/* Connector Arrow (desktop only) */}
+                                    {index < processSteps.length - 1 && (
+                                        <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-20">
+                                            <FaChevronRight className="w-6 h-6 text-pink-300" />
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>

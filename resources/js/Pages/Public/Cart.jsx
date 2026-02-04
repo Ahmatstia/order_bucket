@@ -5,6 +5,10 @@ import { useCart } from "../../contexts/CartContext";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import OnboardingModal from "../../Components/OnboardingModal";
 import WhatsAppFloatingButton from "../../Components/WhatsAppFloatingButton";
+import {
+    generateCartWhatsAppMessage,
+    sendWhatsAppMessage,
+} from "../../utils/whatsapp";
 
 export default function Cart() {
     const {
@@ -15,7 +19,7 @@ export default function Cart() {
         incrementQuantity,
         decrementQuantity,
         clearCart,
-        getCartItemImage, // ← TAMBAHKAN INI
+        getCartItemImage,
     } = useCart();
 
     const [customerName] = useLocalStorage("customer_name", "");
@@ -31,25 +35,13 @@ export default function Cart() {
             return;
         }
 
-        const phoneNumber = "6281234567890";
-
-        // Build WhatsApp message
-        let message = `Halo admin BucketBouquets! 😊\n\n`;
-        message += `Saya ${customerName} mau pesan:\n\n`;
-
-        cartItems.forEach((item, index) => {
-            message += `${index + 1}. *${item.name}*\n`;
-            message += `   Jumlah: ${item.quantity}\n`;
-            message += `   Harga: Rp ${item.price.toLocaleString("id-ID")} × ${item.quantity} = Rp ${(item.price * item.quantity).toLocaleString("id-ID")}\n\n`;
-        });
-
-        message += `*TOTAL: Rp ${cartTotal.toLocaleString("id-ID")}*\n\n`;
-        message += `Bisa dikirim hari ini? Terima kasih! 🌸`;
-
-        const encodedMessage = encodeURIComponent(message);
-        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-
-        window.open(whatsappUrl, "_blank");
+        // GUNAKAN FUNGSI UTILITAS
+        const message = generateCartWhatsAppMessage(
+            cartItems,
+            cartTotal,
+            customerName,
+        );
+        sendWhatsAppMessage(message);
     };
 
     const handleContinueShopping = () => {
@@ -118,14 +110,6 @@ export default function Cart() {
                                     {cartItems.map((item) => {
                                         const productImage =
                                             getCartItemImage(item);
-                                        console.log("🛒 Cart Item:", {
-                                            id: item.id,
-                                            name: item.name,
-                                            images: item.images,
-                                            image_url: item.image_url,
-                                            image_path: item.image_path,
-                                            productImage: productImage,
-                                        });
 
                                         return (
                                             <div
@@ -140,11 +124,6 @@ export default function Cart() {
                                                             alt={item.name}
                                                             className="w-full h-full object-cover"
                                                             onError={(e) => {
-                                                                console.error(
-                                                                    "❌ Cart: Image failed to load:",
-                                                                    e.target
-                                                                        .src,
-                                                                );
                                                                 e.target.onerror =
                                                                     null;
                                                                 e.target.style.display =
@@ -392,18 +371,12 @@ export default function Cart() {
                     </div>
                 )}
 
-                {/* Debug Info */}
+                {/* Debug Info (optional) */}
                 <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
                     <p className="text-purple-800 text-sm">
                         <span className="font-bold">Debug Info:</span>{" "}
-                        {cartCount} items in cart. Check console for cart data.
+                        {cartCount} items in cart.
                     </p>
-                    <button
-                        onClick={() => console.log("🛒 Cart Items:", cartItems)}
-                        className="mt-2 text-xs bg-purple-100 hover:bg-purple-200 px-2 py-1 rounded"
-                    >
-                        Log Cart Data
-                    </button>
                 </div>
             </div>
 
