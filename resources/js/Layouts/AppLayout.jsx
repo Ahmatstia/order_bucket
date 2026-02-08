@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "@inertiajs/react";
+import { Link, usePage } from "@inertiajs/react";
 import CustomerGreeting from "../Components/CustomerGreeting";
 import CartIcon from "../Components/CartIcon";
 import {
@@ -12,11 +12,18 @@ import {
     FaHeart,
     FaShieldAlt,
     FaTruck,
+    FaUser,
+    FaSignOutAlt,
+    FaTachometerAlt,
 } from "react-icons/fa";
 
 export default function AppLayout({ children }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const [showAdminMenu, setShowAdminMenu] = useState(false);
+
+    // Ambil data auth dari Inertia
+    const { auth } = usePage().props;
 
     // Handle scroll effect for header
     useEffect(() => {
@@ -40,6 +47,43 @@ export default function AppLayout({ children }) {
             document.body.style.overflow = "unset";
         };
     }, [isMobileMenuOpen]);
+
+    // Handle logout - FIXED VERSION
+    const handleLogout = async (e) => {
+        e.preventDefault();
+
+        if (!window.confirm("Yakin ingin logout dari admin panel?")) {
+            return;
+        }
+
+        try {
+            const csrfToken = document.querySelector(
+                'meta[name="csrf-token"]',
+            )?.content;
+
+            const response = await fetch("/logout", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    "X-CSRF-TOKEN": csrfToken || "",
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+                credentials: "same-origin",
+            });
+
+            if (response.ok || response.redirected) {
+                // Redirect ke home page
+                window.location.href = "/";
+            } else {
+                alert("Logout gagal, silakan coba lagi.");
+            }
+        } catch (error) {
+            console.error("Logout error:", error);
+            // Fallback: redirect langsung
+            window.location.href = "/logout";
+        }
+    };
 
     return (
         <div className="min-h-screen bg-white">
@@ -92,6 +136,22 @@ export default function AppLayout({ children }) {
                 .mobile-menu-backdrop {
                     backdrop-filter: blur(8px);
                     -webkit-backdrop-filter: blur(8px);
+                }
+
+                /* Animasi dropdown admin */
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                .admin-dropdown {
+                    animation: fadeIn 0.2s ease-out;
                 }
             `}</style>
 
@@ -177,9 +237,75 @@ export default function AppLayout({ children }) {
                                 </li>
                             </ul>
 
-                            {/* Cart Icon + CTA */}
+                            {/* Cart Icon + CTA + Admin Menu */}
                             <div className="flex items-center space-x-4">
                                 <CartIcon />
+
+                                {/* Admin Menu (jika login) */}
+                                {auth.user && (
+                                    <div className="relative">
+                                        <button
+                                            onClick={() =>
+                                                setShowAdminMenu(!showAdminMenu)
+                                            }
+                                            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg font-medium font-poppins text-sm group"
+                                        >
+                                            <FaUser className="w-4 h-4" />
+                                            <span>Admin</span>
+                                        </button>
+
+                                        {/* Dropdown Admin Menu */}
+                                        {showAdminMenu && (
+                                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 admin-dropdown overflow-hidden">
+                                                <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-indigo-50">
+                                                    <p className="text-sm font-medium text-gray-900">
+                                                        {auth.user.name}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 truncate">
+                                                        {auth.user.email}
+                                                    </p>
+                                                </div>
+                                                <div className="py-2">
+                                                    <Link
+                                                        href="/admin"
+                                                        className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors"
+                                                        onClick={() =>
+                                                            setShowAdminMenu(
+                                                                false,
+                                                            )
+                                                        }
+                                                    >
+                                                        <FaTachometerAlt className="w-4 h-4" />
+                                                        Dashboard
+                                                    </Link>
+                                                    <Link
+                                                        href="/admin/products"
+                                                        className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors"
+                                                        onClick={() =>
+                                                            setShowAdminMenu(
+                                                                false,
+                                                            )
+                                                        }
+                                                    >
+                                                        <span className="w-4 h-4 text-center">
+                                                            📦
+                                                        </span>
+                                                        Kelola Produk
+                                                    </Link>
+                                                    <button
+                                                        onClick={handleLogout}
+                                                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors text-left"
+                                                    >
+                                                        <FaSignOutAlt className="w-4 h-4" />
+                                                        Logout
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* WhatsApp CTA */}
                                 <a
                                     href="https://wa.me/6282371663414"
                                     target="_blank"
@@ -195,6 +321,14 @@ export default function AppLayout({ children }) {
                         {/* ================= MOBILE ================= */}
                         <div className="flex items-center gap-3 md:hidden">
                             <CartIcon />
+
+                            {/* Admin Indicator Mobile */}
+                            {auth.user && (
+                                <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                    A
+                                </div>
+                            )}
+
                             <button
                                 onClick={() =>
                                     setIsMobileMenuOpen(!isMobileMenuOpen)
@@ -239,11 +373,12 @@ export default function AppLayout({ children }) {
                 {isMobileMenuOpen && (
                     <>
                         <div
-                            className="fixed inset-0 bg-black/40 z-[60]"
+                            className="fixed inset-0 bg-black/40 z-[60] mobile-menu-backdrop"
                             onClick={() => setIsMobileMenuOpen(false)}
                         />
-                        <div className="absolute top-full left-0 right-0 bg-white shadow-2xl z-[70] animate-slide-down">
+                        <div className="absolute top-full left-0 right-0 bg-white shadow-2xl z-[70] animate-slide-down max-h-[80vh] overflow-y-auto">
                             <div className="container mx-auto px-4 py-6 space-y-3">
+                                {/* Regular Menu Items */}
                                 {[
                                     { label: "🏠 Home", href: "/" },
                                     { label: "🌸 Katalog", href: "/catalog" },
@@ -262,11 +397,53 @@ export default function AppLayout({ children }) {
                                     </Link>
                                 ))}
 
+                                {/* Admin Menu in Mobile - HANYA TAMPIL JIKA auth.user */}
+                                {auth.user && (
+                                    <>
+                                        <div className="mt-4 pt-4 border-t border-gray-200">
+                                            <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                                                Admin Menu
+                                            </p>
+                                            <Link
+                                                href="/admin"
+                                                onClick={() =>
+                                                    setIsMobileMenuOpen(false)
+                                                }
+                                                className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl text-purple-700 font-medium"
+                                            >
+                                                <FaTachometerAlt className="w-4 h-4" />
+                                                Dashboard Admin
+                                            </Link>
+                                            <Link
+                                                href="/admin/products"
+                                                onClick={() =>
+                                                    setIsMobileMenuOpen(false)
+                                                }
+                                                className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl"
+                                            >
+                                                <span>📦</span>
+                                                Kelola Produk
+                                            </Link>
+                                            <button
+                                                onClick={(e) => {
+                                                    handleLogout(e);
+                                                    setIsMobileMenuOpen(false);
+                                                }}
+                                                className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl text-left"
+                                            >
+                                                <FaSignOutAlt className="w-4 h-4" />
+                                                Logout
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* WhatsApp CTA */}
                                 <a
                                     href="https://wa.me/6282371663414"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center justify-center gap-2 w-full mt-4 px-6 py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-full shadow-lg font-semibold font-poppins"
+                                    className="flex items-center justify-center gap-2 w-full mt-4 px-6 py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-xl shadow-lg font-semibold font-poppins"
                                     onClick={() => setIsMobileMenuOpen(false)}
                                 >
                                     <FaWhatsapp className="w-5 h-5" />
@@ -433,15 +610,6 @@ export default function AppLayout({ children }) {
                                         className="text-gray-400 hover:text-pink-400 transition-colors text-sm md:text-base flex items-center gap-2 group font-poppins"
                                     >
                                         <span className="w-1.5 h-1.5 bg-pink-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                                        Cara Order
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        href="#"
-                                        className="text-gray-400 hover:text-pink-400 transition-colors text-sm md:text-base flex items-center gap-2 group font-poppins"
-                                    >
-                                        <span className="w-1.5 h-1.5 bg-pink-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
                                         FAQ
                                     </a>
                                 </li>
@@ -544,6 +712,17 @@ export default function AppLayout({ children }) {
                                 >
                                     Refund Policy
                                 </a>
+                                {auth.user && (
+                                    <>
+                                        <span className="text-gray-600">•</span>
+                                        <Link
+                                            href="/admin"
+                                            className="text-purple-400 hover:text-purple-300 transition-colors font-medium"
+                                        >
+                                            Admin Dashboard
+                                        </Link>
+                                    </>
+                                )}
                             </div>
                         </div>
 
